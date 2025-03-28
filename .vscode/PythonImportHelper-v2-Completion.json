@@ -1,0 +1,285 @@
+[
+    {
+        "label": "Flask",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "render_template",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "flet",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "flet",
+        "description": "flet",
+        "detail": "flet",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "shutil",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "shutil",
+        "description": "shutil",
+        "detail": "shutil",
+        "documentation": {}
+    },
+    {
+        "label": "bcrypt",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "bcrypt",
+        "description": "bcrypt",
+        "detail": "bcrypt",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "index",
+        "kind": 2,
+        "importPath": "Sandbox_Files.Unused_Test_Files.app",
+        "description": "Sandbox_Files.Unused_Test_Files.app",
+        "peekOfCode": "def index():\n    return render_template('index.html')\nif __name__ == '__main__':\n    app.run(debug=True)",
+        "detail": "Sandbox_Files.Unused_Test_Files.app",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.app",
+        "description": "Sandbox_Files.Unused_Test_Files.app",
+        "peekOfCode": "app = Flask(__name__)\n@app.route('/')\ndef index():\n    return render_template('index.html')\nif __name__ == '__main__':\n    app.run(debug=True)",
+        "detail": "Sandbox_Files.Unused_Test_Files.app",
+        "documentation": {}
+    },
+    {
+        "label": "GospelJukeBox",
+        "kind": 6,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "class GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800\n        self.current_view = \"music\"  # Default view: music or pictures",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "def main(page: ft.Page):\n    app = GospelJukeBox(page)\nft.app(target=main)",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_USERNAME",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "ADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_PASSWORD_HASH",
+        "kind": 5,
+        "importPath": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "description": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "peekOfCode": "ADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800",
+        "detail": "Sandbox_Files.Unused_Test_Files.main_BU2",
+        "documentation": {}
+    },
+    {
+        "label": "GospelJukeBox",
+        "kind": 6,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "class GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800\n        self.current_view = \"music\"  # Default view: music or pictures",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def main(page: ft.Page):\n    app = GospelJukeBox(page)\nft.app(target=main)",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_USERNAME",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "ADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_PASSWORD_HASH",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "ADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "GospelJukeBox",
+        "kind": 6,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "class GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800\n        self.current_view = \"music\"  # Default view: music or pictures",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def main(page: ft.Page):\n    app = GospelJukeBox(page)\nft.app(target=main)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_USERNAME",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "ADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "ADMIN_PASSWORD_HASH",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "ADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800",
+        "detail": "main",
+        "documentation": {}
+    }
+]

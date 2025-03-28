@@ -1,0 +1,214 @@
+# Master Prompt for File Structure and Organization
+
+## Overview
+This document provides guidelines for organizing application files into a structured folder system. Follow these principles to create a clean, maintainable project structure that separates essential application files from development and test files.
+
+## File Organization Principles
+
+### 1. Analyze the Application Structure
+- Identify the main application file(s) (e.g., main.py, Gospel_JukeBox.py)
+- Identify essential data directories (e.g., mp3_files, pictures, data/songs)
+- Identify configuration files (e.g., requirements.txt)
+- Identify non-essential files (test files, backups, development scripts)
+
+### 2. Recommended Folder Structure
+
+```
+/                           # Root directory
+├── main.py                 # Main application file
+├── requirements.txt        # Dependencies
+├── data/                   # Application data
+│   └── songs/              # Song directories with mp3, txt, and image files
+├── mp3_files/              # MP3 files with corresponding lyrics
+├── pictures/               # Image files
+├── Sandbox_Files/          # Non-essential files
+│   ├── .dockerignore       # Docker ignore file
+│   ├── .env                # Environment variables
+│   ├── Dockerfile          # Docker configuration
+│   └── Unused_Test_Files/  # Test and backup files
+```
+
+### 3. File Classification Guidelines
+
+#### Essential Files (Keep in Root Directory)
+- Main application files (e.g., main.py, Gospel_JukeBox.py)
+- Configuration files (e.g., requirements.txt)
+- README.md (contains setup instructions and project overview)
+
+#### Essential Data Directories (Keep in Root Directory)
+- mp3_files/
+- pictures/
+- data/
+
+#### Non-Essential Files (Move to Sandbox_Files)
+- Docker configuration files (place at Sandbox_Files root)
+- Development and test files (place in Unused_Test_Files subfolder)
+  - Backup files (*_BU*, *.bak)
+  - Test files (app.py, create_folders.bat)
+  - Unused code files (*.pyyy)
+  - Development scripts
+
+## Language-Specific Directory Structures
+
+### Python Applications
+```
+/
+├── src/                    # Source code
+│   ├── __init__.py         # Makes src a package
+│   ├── main.py             # Entry point
+│   ├── models/             # Data models
+│   ├── controllers/        # Business logic
+│   ├── views/              # UI components (for web apps)
+│   └── utils/              # Helper functions
+├── tests/                  # Test files
+├── docs/                   # Documentation
+├── config/                 # Configuration files
+├── requirements.txt        # Production dependencies
+└── README.md
+```
+
+### JavaScript/TypeScript (React) Applications
+```
+/
+├── src/                    # Source code
+│   ├── components/         # React components
+│   ├── hooks/              # Custom React hooks
+│   ├── context/            # React context providers
+│   ├── services/           # API services
+│   ├── utils/              # Helper functions
+│   ├── assets/             # Static assets
+│   ├── App.js              # Main App component
+│   └── index.js            # Entry point
+├── public/                 # Public assets
+└── README.md
+```
+
+### Java (Spring Boot) Applications
+```
+/
+├── src/
+│   ├── main/
+│   │   ├── java/com/example/project/
+│   │   │   ├── controllers/    # REST controllers
+│   │   │   ├── models/         # Data models
+│   │   │   ├── repositories/   # Data access
+│   │   │   ├── services/       # Business logic
+│   │   │   ├── config/         # Configuration
+│   │   │   └── Application.java # Entry point
+│   │   └── resources/
+│   └── test/
+├── pom.xml                # Project dependencies
+└── README.md
+```
+
+## Environment Configuration Principles
+- Create separate configuration files for different environments
+- Never commit sensitive information to version control
+- Use environment variables for configuration that changes between environments
+- Document all required environment variables
+
+## Asset Management Principles
+- Use a consistent naming convention for all asset files
+- Optimize assets during the build process
+- Implement caching strategies for static assets
+- Separate source assets from compiled/processed assets
+
+## Database Organization Principles
+- Use sequential naming for migration files
+- Ensure migrations are idempotent
+- Include both "up" and "down" migrations for reversibility
+- Document database schema changes
+
+## Version Control Principles
+- Create a comprehensive .gitignore file
+- Use semantic versioning for releases
+- Implement a consistent branching strategy
+- Write descriptive commit messages
+
+## Documentation Principles
+- Maintain up-to-date documentation for all major components
+- Include code examples for common use cases
+- Document APIs with request/response examples
+- Use a consistent documentation format
+
+## Maintenance Guidelines
+- Keep the root directory clean with only essential files
+- Place new test files in the Sandbox_Files/Unused_Test_Files directory
+- Update .dockerignore when adding new file types to exclude
+- Document any changes to the folder structure
+- Regularly review and clean up unused code and assets
+- Maintain consistent naming conventions across the project
+
+## README.md Template
+
+When setting up a new project, create a README.md file in the root directory based on the following template structure. Use this template as a reference to manually create a comprehensive README.md file for your project.
+
+### README.md Template Structure
+
+```markdown
+# [Project Name] Application
+
+## Overview
+[Brief description of the application and its purpose]
+
+## Project Structure
+
+The application follows this structure:
+
+```
+[Include the project's folder structure here]
+```
+
+## Development Setup
+
+### Prerequisites
+- [List required software and versions]
+- [List required dependencies]
+
+### Installation
+1. [Step-by-step installation instructions]
+2. [Include code examples for installation commands]
+3. [Instructions for running the application]
+
+## Docker Setup
+
+### Prerequisites
+- Docker installed on your system
+
+### Building the Docker Image
+[Include Docker build command]
+
+### Running the Docker Container
+[Include Docker run command]
+
+### Accessing the Application
+[Instructions for accessing the application]
+
+### Docker Management Commands
+[Include common Docker management commands]
+
+## Version Control Guidelines
+
+### Branching Strategy
+[Describe the branching strategy]
+
+### Commit Message Format
+[Describe the commit message format]
+
+### Tagging Releases
+[Include instructions for tagging releases]
+
+## Maintenance Guidelines
+
+[List maintenance best practices]
+
+## Troubleshooting
+
+### Common Issues
+[List common issues and their solutions]
+
+### Getting Help
+[Instructions for getting help]
+```
+
+This organization structure ensures a clean separation between essential application files and development/test files, making the codebase more maintainable and easier to navigate. The README.md template provides a comprehensive guide for users and developers to understand, set up, and maintain the project.

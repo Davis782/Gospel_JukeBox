@@ -1,0 +1,42 @@
+# Version control
+.git
+.gitignore
+
+# Development and backup files
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.so
+.Python
+*.bak
+*_BU*
+*.pyyy
+
+# Application data (will be created in container)
+data/
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Docker files
+.dockerignore
+Dockerfile
+
+# Scripts
+create_folders.bat
+
+# Environment variables
+.env
+
+# Flask app (not used in the main application)
+app.py
+
+# Templates (if not needed)
+templates/
