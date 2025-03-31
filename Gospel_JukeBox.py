@@ -1,8 +1,9 @@
-import flet as ft
 import os
 import shutil
 import bcrypt
+import base64
 from datetime import datetime
+import flet as ft
 
 # Define the application paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,6 +19,20 @@ ADMIN_USERNAME = "admin"
 # Hashed password for "admin123"
 ADMIN_PASSWORD_HASH = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt())
 
+# Helper function to encode MP3 files to base64
+def encode_audio_to_base64(file_path):
+    """
+    Read an audio file and encode it to base64 string
+    """
+    try:
+        with open(file_path, "rb") as audio_file:
+            audio_data = audio_file.read()
+            base64_data = base64.b64encode(audio_data).decode('utf-8')
+            return base64_data
+    except Exception as e:
+        print(f"Error encoding audio file {file_path}: {e}")
+        return None
+
 class GospelJukeBox:
     def __init__(self, page: ft.Page):
         self.page = page
@@ -25,7 +40,6 @@ class GospelJukeBox:
         self.page.theme_mode = ft.ThemeMode.LIGHT
         self.page.padding = 20
         self.page.window_width = 1000
-        self.page.window_height = 800
         self.page.window_height = 800
         self.current_view = "music"  # Default view: music or pictures
         self.current_song = None
@@ -270,10 +284,16 @@ class GospelJukeBox:
                     with open(text_file_path, 'w') as f:
                         f.write(f"Lyrics for {file_name}")
                 
+                # For MP3 files, encode to base64
+                base64_data = None
+                if any(media_file.lower().endswith(ext) for ext in [".mp3"]):
+                    base64_data = encode_audio_to_base64(media_path)
+                
                 media_list.append({
                     "name": file_name,
                     "media_file": media_path,
-                    "text_file": text_file_path
+                    "text_file": text_file_path,
+                    "base64_data": base64_data
                 })
             
             # Then check subdirectories as before
@@ -289,10 +309,18 @@ class GospelJukeBox:
                     text_files = [f for f in os.listdir(folder_path) if f.lower().endswith(".txt")]
                     
                     if media_files and text_files:
+                        media_path = os.path.join(folder_path, media_files[0])
+                        
+                        # For MP3 files, encode to base64
+                        base64_data = None
+                        if any(media_files[0].lower().endswith(ext) for ext in [".mp3"]):
+                            base64_data = encode_audio_to_base64(media_path)
+                        
                         media_list.append({
                             "name": folder_name,
-                            "media_file": os.path.join(folder_path, media_files[0]),
-                            "text_file": os.path.join(folder_path, text_files[0])
+                            "media_file": media_path,
+                            "text_file": os.path.join(folder_path, text_files[0]),
+                            "base64_data": base64_data
                         })
         return media_list
     
@@ -415,13 +443,26 @@ class GospelJukeBox:
             with open(self.current_song["text_file"], "r") as f:
                 lyrics = f.read()
         
-        # Create audio control with a unique ID for tracking
-        audio_control = ft.Audio(
-            src=self.current_song["media_file"],
-            autoplay=False,  # Important: don't autoplay yet
-            volume=1.0,
-            on_state_changed=self.audio_state_changed
-        )
+        # Create audio control with base64 data if available
+        audio_control = None
+        if self.current_song.get("base64_data"):
+            # Use base64 encoded data for audio playback
+            audio_control = ft.Audio(
+                src_base64=self.current_song["base64_data"],
+                autoplay=False,  # Important: don't autoplay yet
+                volume=1.0,
+                on_state_changed=self.audio_state_changed
+            )
+            print(f"Created audio control with base64 data")
+        else:
+            # Fallback to file path if base64 encoding failed
+            audio_control = ft.Audio(
+                src=self.current_song["media_file"],
+                autoplay=False,  # Important: don't autoplay yet
+                volume=1.0,
+                on_state_changed=self.audio_state_changed
+            )
+            print(f"Created audio control with file path (base64 not available)")
         
         # Store reference to the audio control
         self.current_audio_control = audio_control
@@ -600,177 +641,37 @@ class GospelJukeBox:
             if hasattr(audio_control, 'play'):
                 audio_control.play()
         except Exception as e:
-            print(f"Error playing audio: {e}")
+            print(f"Error in _play_audio_after_update: {e}")
     
-    def audio_state_changed(self, e):
-        # Handle audio state changes (for autoplay functionality and progress tracking)
-        print(f"Audio state changed: {e.data}")
-        
-        if e.data == "durationchange" and self.current_audio_control:
-            # Update duration when it becomes available
-            try:
-                self.song_duration = self.current_audio_control.get_duration() / 1000  # Convert from ms to seconds
-                # Ensure the slider's max value matches the song duration
-                self.progress_slider.max = self.song_duration
-                self.progress_slider.disabled = False
-                self.update_time_display()
-                self.page.update()
-                print(f"Updated song duration: {self.song_duration} seconds")
-            except Exception as ex:
-                print(f"Error getting duration: {ex}")
-        
-        elif e.data == "timeupdate" and self.current_audio_control:
-            # Update current position
-            try:
-                # Get the current position from the audio control
-                current_ms = self.current_audio_control.get_current_position()
-                self.current_position = current_ms / 1000  # Convert from ms to seconds
-                
-                # Ensure position is within valid range
-                if self.current_position < 0:
-                    self.current_position = 0
-                elif self.current_position > self.song_duration and self.song_duration > 0:
-                    self.current_position = self.song_duration
-                
-                # Update the slider to match the current position
-                self.progress_slider.value = self.current_position
-                # Update the time display with the current position
-                self.update_time_display()
-                
-                # Check if we're near the end of the song (within 0.5 seconds) to ensure smooth transition
-                if self.autoplay and self.current_position >= self.song_duration - 0.5 and self.song_duration > 0:
-                    print("Near end of song, preparing for next song")
-                    # This will ensure we don't trigger this multiple times
-                    self.current_position = self.song_duration
-                    self.progress_slider.value = self.song_duration
-                    self.update_time_display()
-                    # Force the "ended" event by seeking to the end
-                    if hasattr(self.current_audio_control, 'seek'):
-                        self.current_audio_control.seek(int(self.song_duration * 1000))
-                
-                # Force a page update to reflect changes in UI
-                self.page.update()
-            except Exception as ex:
-                print(f"Error getting current time: {ex}")
-        
-        elif e.data == "play" or e.data == "playing":
-            # When playback starts or resumes, ensure the slider position is in sync
-            try:
-                if self.current_audio_control:
-                    current_ms = self.current_audio_control.get_current_position()
-                    self.current_position = current_ms / 1000  # Convert from ms to seconds
-                    self.progress_slider.value = self.current_position
-                    self.update_time_display()
-                    print(f"Updated position on play event: {self.current_position} seconds")
-                    self.page.update()
-            except Exception as ex:
-                print(f"Error updating position on play event: {ex}")
-        
-        elif e.data == "pause":
-            # When playback is paused, ensure the slider position is in sync
-            try:
-                if self.current_audio_control:
-                    current_ms = self.current_audio_control.get_current_position()
-                    self.current_position = current_ms / 1000  # Convert from ms to seconds
-                    self.progress_slider.value = self.current_position
-                    self.update_time_display()
-                    print(f"Updated position on pause event: {self.current_position} seconds")
-                    self.page.update()
-            except Exception as ex:
-                print(f"Error updating position on pause event: {ex}")
-        
-        elif e.data == "ended":
-            # Reset position when song ends
-            self.current_position = 0
-            self.progress_slider.value = 0
-            self.update_time_display()
-            
-            if self.autoplay and self.current_song:
-                print("Song ended, autoplay is enabled. Playing next song.")
-                # Ensure playing state is set to True for autoplay
-                self.is_playing = True
-                
-                # Find the next song in the queue
-                next_song_index = None
-                
-                # If queue is empty, use all songs
-                if not self.queue:
-                    self.queue = list(range(len(self.songs_list)))
-                
-                # Find the current song's position in the queue
-                if self.current_song_index in self.queue:
-                    current_queue_position = self.queue.index(self.current_song_index)
-                    # Get the next song in the queue (wrap around if needed)
-                    if current_queue_position < len(self.queue) - 1:
-                        next_song_index = self.queue[current_queue_position + 1]
-                    else:
-                        # Loop back to the beginning of the queue if loop_queue is enabled
-                        if self.loop_queue:
-                            next_song_index = self.queue[0]
-                            print("Looping back to first song in queue")
-                        else:
-                            # Stop playback if we reached the end of the queue and loop is disabled
-                            self.is_playing = False
-                            play_button = self.player_controls.controls[0].controls[1]
-                            play_button.icon = ft.icons.PLAY_ARROW
-                            play_button.data = "play"
-                            self.page.update()
-                            return
-                else:
-                    # Current song not in queue, start from the beginning of the queue
-                    if self.queue:
-                        next_song_index = self.queue[0]
-                    else:
-                        # Fallback: move to the next song in the list
-                        next_song_index = (self.current_song_index + 1) % len(self.songs_list)
-                
-                # Play the next song
-                if next_song_index is not None:
-                    # First stop all audio playback to prevent multiple songs playing
-                    try:
-                        # Stop and release the current audio control if it exists
-                        if self.current_audio_control:
-                            try:
-                                if hasattr(self.current_audio_control, 'pause'):
-                                    self.current_audio_control.pause()
-                                if hasattr(self.current_audio_control, 'release'):
-                                    self.current_audio_control.release()
-                                print(f"Stopped current audio control before autoplay: {id(self.current_audio_control)}")
-                            except Exception as ex:
-                                print(f"Error stopping current audio before autoplay: {ex}")
-                        
-                        # Master stop: check all page controls to find and stop any audio elements
-                        print("Performing master audio stop before autoplay...")
-                        # First check the content area which contains the audio control
-                        if self.content_area and hasattr(self.content_area, 'content'):
-                            self._stop_audio_in_control(self.content_area.content)
-                            
-                        # Then check all page controls as a fallback
-                        for control in self.page.controls:
-                            self._stop_audio_in_control(control)
-                            
-                        # Force a small delay to ensure audio has stopped
-                        self.page.update()
-                    except Exception as e:
-                        print(f"Error in master audio stop before autoplay: {e}")
-                    
-                    # Now play the next song
-                    self.current_song_index = next_song_index
-                    self.select_song(self.current_song_index)
-            else:
-                print(f"Song ended but autoplay is {self.autoplay}")
-                self.page.update()
-    
-    def play_previous(self, e):
-        if not self.songs_list:
-            return
-        
-        # Set playing state to true when previous button is pressed
-        self.is_playing = True
-        
-        # Perform a complete audio stop to prevent multiple songs playing
+    def _stop_audio_in_control(self, control):
+        # Recursively search for and stop audio controls
         try:
-            # Stop and release the current audio control if it exists
+            if isinstance(control, ft.Audio):
+                try:
+                    if hasattr(control, 'pause'):
+                        control.pause()
+                    if hasattr(control, 'release'):
+                        control.release()
+                    print(f"Stopped audio control in recursive search: {id(control)}")
+                except Exception as ex:
+                    print(f"Error stopping audio in recursive search: {ex}")
+                return
+            
+            # Check if the control has controls attribute (like Column, Row, etc.)
+            if hasattr(control, 'controls') and control.controls:
+                for child in control.controls:
+                    self._stop_audio_in_control(child)
+            
+            # Check if the control has content attribute (like Container)
+            if hasattr(control, 'content') and control.content:
+                self._stop_audio_in_control(control.content)
+        except Exception as e:
+            print(f"Error in _stop_audio_in_control: {e}")
+    
+    def stop_all_audio(self):
+        # Stop all audio playback on the page
+        try:
+            # First, stop the current audio control if it exists
             if self.current_audio_control:
                 try:
                     if hasattr(self.current_audio_control, 'pause'):
@@ -781,467 +682,44 @@ class GospelJukeBox:
                 except Exception as ex:
                     print(f"Error stopping current audio: {ex}")
             
-            # Master stop: check all page controls to find and stop any audio elements
-            print("Performing master audio stop in play_previous...")
-            # First check the content area which contains the audio control
-            if self.content_area and hasattr(self.content_area, 'content'):
-                self._stop_audio_in_control(self.content_area.content)
-                
-            # Then check all page controls as a fallback
+            # Then check all page controls to find and stop any audio elements
             for control in self.page.controls:
                 self._stop_audio_in_control(control)
-                
-            # Force a small delay to ensure audio has stopped
-            self.page.update()
-        except Exception as e:
-            print(f"Error in master audio stop: {e}")
-        
-        # Find the previous song in the queue if autoplay is enabled
-        if self.autoplay and self.queue:
-            # Find the current song's position in the queue
-            if self.current_song_index in self.queue:
-                current_queue_position = self.queue.index(self.current_song_index)
-                # Get the previous song in the queue (wrap around if needed)
-                if current_queue_position > 0:
-                    self.current_song_index = self.queue[current_queue_position - 1]
-                else:
-                    # Loop back to the end of the queue if loop_queue is enabled
-                    if self.loop_queue:
-                        self.current_song_index = self.queue[-1]
-                    else:
-                        # Stay on the first song if loop is disabled
-                        pass
-            else:
-                # Current song not in queue, start from the end of the queue
-                self.current_song_index = self.queue[-1]
-        else:
-            # Regular previous song behavior
-            self.current_song_index = (self.current_song_index - 1) % len(self.songs_list)
             
-        # Enable the slider for the new song
-        self.progress_slider.disabled = False
-        self.select_song(self.current_song_index)
-        
-        # Update play button to show pause icon since we're now playing
-        play_button = self.player_controls.controls[0].controls[1]
-        play_button.icon = ft.icons.PAUSE
-        play_button.data = "pause"
-        self.page.update()
-    
-    def play_next(self, e):
-        if not self.songs_list:
-            return
-            
-        # Set playing state to true when next button is pressed
-        if e is not None:  # Only set if user clicked next (not from autoplay)
-            self.is_playing = True
-        # If this was triggered by autoplay (e is None), ensure playing state is maintained
-        elif e is None and self.autoplay:
-            self.is_playing = True
-        
-        # Perform a complete audio stop to prevent multiple songs playing
-        try:
-            # Stop and release the current audio control if it exists
-            if self.current_audio_control:
-                try:
-                    if hasattr(self.current_audio_control, 'pause'):
-                        self.current_audio_control.pause()
-                    if hasattr(self.current_audio_control, 'release'):
-                        self.current_audio_control.release()
-                    print(f"Stopped current audio control in play_next: {id(self.current_audio_control)}")
-                except Exception as ex:
-                    print(f"Error stopping current audio in play_next: {ex}")
-            
-            # Master stop: check all page controls to find and stop any audio elements
-            print("Performing master audio stop in play_next...")
-            # First check the content area which contains the audio control
+            # Also check the content area specifically
             if self.content_area and hasattr(self.content_area, 'content'):
                 self._stop_audio_in_control(self.content_area.content)
-                
-            # Then check all page controls as a fallback
-            for control in self.page.controls:
-                self._stop_audio_in_control(control)
-                
-            # Force a small delay to ensure audio has stopped
-            self.page.update()
-        except Exception as e:
-            print(f"Error in master audio stop in play_next: {e}")
-        
-        # Find the next song in the queue if autoplay is enabled
-        if self.autoplay and self.queue:
-            # Find the current song's position in the queue
-            if self.current_song_index in self.queue:
-                current_queue_position = self.queue.index(self.current_song_index)
-                # Get the next song in the queue (wrap around if needed)
-                if current_queue_position < len(self.queue) - 1:
-                    self.current_song_index = self.queue[current_queue_position + 1]
-                else:
-                    # Loop back to the beginning of the queue if loop_queue is enabled
-                    if self.loop_queue:
-                        self.current_song_index = self.queue[0]
-                    else:
-                        # Stay on the last song if loop is disabled and we're at the end
-                        if e is not None:  # Only advance if user clicked next
-                            self.current_song_index = (self.current_song_index + 1) % len(self.songs_list)
-            else:
-                # Current song not in queue, start from the beginning of the queue
-                self.current_song_index = self.queue[0]
-        else:
-            # Regular next song behavior
-            self.current_song_index = (self.current_song_index + 1) % len(self.songs_list)
-        
-        # Enable the slider for the new song
-        self.progress_slider.disabled = False
-        self.select_song(self.current_song_index)
-        
-        # Update play button to show pause icon since we're now playing
-        play_button = self.player_controls.controls[0].controls[1]
-        play_button.icon = ft.icons.PAUSE
-        play_button.data = "pause"
-        self.page.update()
-    
-    def toggle_autoplay(self, e):
-        self.autoplay = e.control.value
-        
-        # If autoplay is enabled but queue is empty, add all songs to queue
-        if self.autoplay and not self.queue:
-            self.queue = list(range(len(self.songs_list)))
-            # Refresh the display to show queue status
-            self.display_music_list()
-    
-    def toggle_queue(self, e, index):
-        # Add or remove the song from the queue
-        if e.control.value:
-            if index not in self.queue:
-                self.queue.append(index)
-        else:
-            if index in self.queue:
-                self.queue.remove(index)
-        
-        # Sort the queue to maintain the original song order
-        self.queue.sort()
-        
-    def seek_position(self, e):
-        # Update the position when user drags the slider
-        if self.current_audio_control and hasattr(self.current_audio_control, 'seek'):
-            try:
-                position = e.control.value
-                # Ensure position is within valid range
-                if position < 0:
-                    position = 0
-                elif position > self.song_duration:
-                    position = self.song_duration
-                    
-                # Convert position from seconds to milliseconds for the seek method
-                self.current_audio_control.seek(int(position * 1000))
-                # Update current position to match slider position
-                self.current_position = position
-                # Update the time display with the new position
-                self.update_time_display()
-                
-                print(f"Seeking to position: {position} seconds of {self.song_duration} seconds")
-                
-                # Check if user dragged to the end of the song (within 0.5 seconds of the end)
-                if position >= self.song_duration - 0.5 and self.song_duration > 0:
-                    print("Slider dragged to end of song, triggering end of song")
-                    # Force the "ended" event by seeking to the end
-                    if hasattr(self.current_audio_control, 'seek'):
-                        self.current_audio_control.seek(int(self.song_duration * 1000))
-                    
-                    # If autoplay is enabled, play the next song
-                    if self.autoplay:
-                        # Reset position
-                        self.current_position = 0
-                        self.progress_slider.value = 0
-                        # Play the next song
-                        self.play_next(None)
-                    else:
-                        # If autoplay is not enabled, just stop at the end
-                        self.current_position = self.song_duration
-                        self.progress_slider.value = self.song_duration
-                        self.update_time_display()
-                        self.page.update()
-                else:
-                    # Update the page to reflect the time display change
-                    self.page.update()
-            except Exception as ex:
-                print(f"Error seeking position: {ex}")
-    
-    def update_time_display(self):
-        # Format time as minutes:seconds for current position
-        current_min = int(self.current_position // 60)
-        current_sec = int(self.current_position % 60)
-        
-        # Calculate remaining time
-        remaining_time = max(0, self.song_duration - self.current_position)
-        remaining_min = int(remaining_time // 60)
-        remaining_sec = int(remaining_time % 60)
-        
-        # Update the time display text with current time and remaining time
-        self.time_display.value = f"{current_min}:{current_sec:02d} / -{remaining_min}:{remaining_sec:02d}"
-        # Print for debugging
-        print(f"Time display updated: {current_min}:{current_sec:02d} / -{remaining_min}:{remaining_sec:02d}")
-    
-    def open_donation_link(self, e):
-        # Open CashApp donation link
-        self.page.launch_url("https://cash.app/$SolidBuildersInc")
-    
-    def show_login_dialog(self, e):
-        # Show admin login dialog
-        if self.is_admin:
-            # If already logged in, log out
-            self.is_admin = False
-            self.admin_panel.visible = False
-            self.page.update()
-            return
             
-        def close_dlg(e):
-            dialog.open = False
-            self.page.update()
-        
-        def try_login(e):
-            username = username_field.value
-            password = password_field.value
+            # Clear the global tracking list
+            self.active_audio_controls = []
             
-            if username == ADMIN_USERNAME and bcrypt.checkpw(password.encode(), ADMIN_PASSWORD_HASH):
-                self.is_admin = True
-                self.admin_panel.visible = True
-                dialog.open = False
-                self.page.update()
-            else:
-                error_text.value = "Invalid username or password"
-                self.page.update()
-        
-        username_field = ft.TextField(label="Username")
-        password_field = ft.TextField(label="Password", password=True)
-        error_text = ft.Text("", color=ft.colors.RED)
-        
-        dialog = ft.AlertDialog(
-            title=ft.Text("Admin Login"),
-            content=ft.Column([
-                username_field,
-                password_field,
-                error_text
-            ], width=300, height=150),
-            actions=[
-                ft.TextButton("Cancel", on_click=close_dlg),
-                ft.TextButton("Login", on_click=try_login)
-            ],
-            actions_alignment=ft.MainAxisAlignment.END
-        )
-        
-        self.page.dialog = dialog
-        dialog.open = True
-        self.page.update()
-    
-    def toggle_theme(self, e):
-        # Toggle between light and dark theme
-        self.page.theme_mode = ft.ThemeMode.DARK if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
-        
-        # Update the theme toggle icon
-        e.control.icon = ft.icons.DARK_MODE if self.page.theme_mode == ft.ThemeMode.LIGHT else ft.icons.LIGHT_MODE
-        
-        # Update the page to apply the theme change
-        self.page.update()
-    
-    def toggle_loop(self, e):
-        # Update loop_queue state
-        self.loop_queue = e.control.value
-        
-        # If loop is enabled and autoplay is enabled, make sure we have a queue
-        if self.loop_queue and self.autoplay and not self.queue:
-            # Add all songs to queue if it's empty
-            self.queue = list(range(len(self.songs_list)))
-            # Refresh the display to show queue status
-            self.display_music_list()
-        
-        print(f"Loop queue set to: {self.loop_queue}")
-        self.page.update()
-    
-    def stop_current_song(self, e):
-        # Stop the current song and reset player
-        try:
-            # Stop all tracked audio controls using our global list
-            self.stop_all_audio()
-            
-            # Reset UI state
+            # Update playing state and button
             self.is_playing = False
-            self.current_position = 0
-            self.progress_slider.value = 0
-            self.progress_slider.disabled = True
-            self.update_time_display()
-            
-            # Update play button icon
             play_button = self.player_controls.controls[0].controls[1]
             play_button.icon = ft.icons.PLAY_ARROW
             play_button.data = "play"
             
-            # Set current_audio_control to None so toggle_play will create a new one
-            self.current_audio_control = None
-            
+            # Force a page update to ensure UI is consistent
             self.page.update()
         except Exception as e:
-            print(f"Error in master stop: {e}")
-            
-    def stop_all_audio(self):
-        """Stop all tracked audio controls"""
-        print(f"Stopping all {len(self.active_audio_controls)} tracked audio controls")
-        
-        # First, stop all tracked audio controls
-        for audio in list(self.active_audio_controls):
-            try:
-                if hasattr(audio, 'pause'):
-                    audio.pause()
-                if hasattr(audio, 'release'):
-                    audio.release()
-                print(f"Stopped tracked audio control: {id(audio)}")
-            except Exception as ex:
-                print(f"Error stopping tracked audio: {ex}")
-            
-            # Remove from tracking list
-            if audio in self.active_audio_controls:
-                self.active_audio_controls.remove(audio)
-        
-        # As a fallback, also use the recursive method to find any untracked audio controls
-        if self.content_area and hasattr(self.content_area, 'content'):
-            self._stop_audio_in_control(self.content_area.content)
-            
-        for control in self.page.controls:
-            self._stop_audio_in_control(control)
+            print(f"Error in stop_all_audio: {e}")
     
-    def _stop_audio_in_control(self, control, exclude_control=None):
-        # Recursively search for and stop all audio controls
-        # exclude_control parameter allows skipping a specific control (useful when toggling play/pause)
-        try:
-            # Check if this control is an Audio control by checking its type name
-            if control.__class__.__name__ == 'Audio':
-                # Skip this control if it's the one we want to exclude
-                if exclude_control is not None and id(control) == id(exclude_control):
-                    print(f"Skipping excluded audio control: {id(control)}")
-                    return
-                    
-                try:
-                    if hasattr(control, 'pause'):
-                        control.pause()
-                    if hasattr(control, 'release'):
-                        control.release()
-                    print(f"Stopped an audio control: {id(control)}")
-                    
-                    # Add to tracking list if not already there
-                    if control not in self.active_audio_controls:
-                        self.active_audio_controls.append(control)
-                        print(f"Added found audio control to tracking list: {id(control)}")
-                    # Remove from tracking list if it's being stopped
-                    elif control in self.active_audio_controls and exclude_control is None:
-                        self.active_audio_controls.remove(control)
-                        print(f"Removed audio control from tracking list: {id(control)}")
-                except Exception as inner_ex:
-                    print(f"Error stopping specific audio control: {inner_ex}")
-            
-            # Check if this control has controls property (like Container, Column, etc.)
-            if hasattr(control, 'controls') and control.controls:
-                for child in control.controls:
-                    self._stop_audio_in_control(child, exclude_control)
-                    
-            # Check if this control has content property (like Container)
-            if hasattr(control, 'content') and control.content:
-                self._stop_audio_in_control(control.content, exclude_control)
-                
-            # Check for tabs and their content
-            if hasattr(control, 'tabs') and control.tabs:
-                for tab in control.tabs:
-                    if hasattr(tab, 'content') and tab.content:
-                        self._stop_audio_in_control(tab.content, exclude_control)
-        except Exception as ex:
-            print(f"Error in recursive audio stop: {ex}")
-    
-    def upload_type_changed(self, e):
-        # Update UI based on selected upload type
-        upload_type = self.upload_type_dropdown.value
-        if upload_type == "mp3":
-            self.media_file_picker.allowed_extensions = ["mp3"]
-        else:  # picture
-            self.media_file_picker.allowed_extensions = ["jpg", "jpeg", "png"]
-    
-    def media_file_picked(self, e):
-        if e.files and len(e.files) > 0:
-            self.media_file_path.value = e.files[0].name
-            self.page.update()
-    
-    def lyrics_file_picked(self, e):
-        if e.files and len(e.files) > 0:
-            self.lyrics_file_path.value = e.files[0].name
-            self.page.update()
-    
-    def upload_files(self, e):
-        # Get values from form
-        upload_type = self.upload_type_dropdown.value
-        folder_name = self.folder_name_field.value
+    def stop_current_song(self, e):
+        # Stop the current song and reset the player
+        self.stop_all_audio()
         
-        # Validate inputs
-        if not upload_type or not folder_name:
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Please select content type and folder name"))
-            self.page.snack_bar.open = True
-            self.page.update()
-            return
+        # Reset progress tracking
+        self.current_position = 0
+        self.song_duration = 0
+        self.progress_slider.value = 0
+        self.progress_slider.disabled = True
+        self.update_time_display()
         
-        # Check if files were selected
-        if not hasattr(self.media_file_picker, "result") or not self.media_file_picker.result or not self.media_file_picker.result.files:
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Please select a media file"))
-            self.page.snack_bar.open = True
-            self.page.update()
-            return
-            
-        if not hasattr(self.lyrics_file_picker, "result") or not self.lyrics_file_picker.result or not self.lyrics_file_picker.result.files:
-            self.page.snack_bar = ft.SnackBar(content=ft.Text("Please select a lyrics/description file"))
-            self.page.snack_bar.open = True
-            self.page.update()
-            return
-        
-        # Create destination folder
-        if upload_type == "mp3":
-            dest_folder = os.path.join(MP3_DIR, folder_name)
-        else:  # picture
-            dest_folder = os.path.join(PICTURES_DIR, folder_name)
-        
-        os.makedirs(dest_folder, exist_ok=True)
-        
-        # Copy files to destination
-        try:
-            # Copy media file
-            media_file = self.media_file_picker.result.files[0]
-            media_ext = os.path.splitext(media_file.name)[1]
-            media_dest = os.path.join(dest_folder, f"{folder_name}{media_ext}")
-            shutil.copy(media_file.path, media_dest)
-            
-            # Copy lyrics/description file
-            lyrics_file = self.lyrics_file_picker.result.files[0]
-            lyrics_dest = os.path.join(dest_folder, "lyrics.txt" if upload_type == "mp3" else "description.txt")
-            shutil.copy(lyrics_file.path, lyrics_dest)
-            
-            # Show success message
-            self.page.snack_bar = ft.SnackBar(content=ft.Text(f"Files uploaded successfully to {folder_name}"))
-            self.page.snack_bar.open = True
-            
-            # Reset form
-            self.folder_name_field.value = ""
-            self.media_file_path.value = "No file selected"
-            self.lyrics_file_path.value = "No file selected"
-            self.media_file_picker.result = None
-            self.lyrics_file_picker.result = None
-            
-            # Reload content
-            self.load_content()
-            
-        except Exception as e:
-            self.page.snack_bar = ft.SnackBar(content=ft.Text(f"Error uploading files: {str(e)}"))
-            self.page.snack_bar.open = True
-            
         self.page.update()
-
-# Main entry point
-def main(page: ft.Page):
     
-    app = GospelJukeBox(page)
-
-ft.app(target=main)
+    def play_previous(self, e):
+        # Play the previous song in the list or queue
+        if not self.songs_list:
+            return
+        
+        if self.queue:
