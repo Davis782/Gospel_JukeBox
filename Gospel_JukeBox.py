@@ -30,7 +30,52 @@ display.start()
 
 
 root = tk.Tk()
-# ==================================================================
+
+# Detect if we're running in a headless environment
+def is_headless_environment():
+    """Check if we're running in a headless environment like Render"""
+    # Check for common environment variables that indicate a headless server
+    if 'RENDER' in os.environ or 'HEADLESS' in os.environ:
+        return True
+    # Check if DISPLAY is not set or empty (Unix/Linux)
+    if os.environ.get('DISPLAY', '') == '':
+        return True
+    # Try to initialize pygame mixer - if it fails, we're likely in a headless env
+    try:
+        pygame.mixer.init()
+        pygame.mixer.quit()
+        return False
+    except pygame.error:
+        return True
+
+# Set up alternative audio playback for headless environments
+HEADLESS_MODE = is_headless_environment()
+if HEADLESS_MODE:
+    print("Running in headless mode - using alternative audio playback")
+    try:
+        # Import necessary libraries for alternative audio playback
+        from pydub import AudioSegment
+        from pydub.playback import play as pydub_play
+        import io
+        # Optional: import sounddevice for another alternative
+        import sounddevice as sd
+        import soundfile as sf
+        HEADLESS_IMPORTS_SUCCESS = True
+    except ImportError:
+        print("Installing required packages for headless audio playback...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "pydub", "sounddevice", "soundfile"])
+        from pydub import AudioSegment
+        from pydub.playback import play as pydub_play
+        import sounddevice as sd
+        import soundfile as sf
+        HEADLESS_IMPORTS_SUCCESS = True
+    except Exception as e:
+        print(f"Warning: Failed to set up headless audio playback: {e}")
+        HEADLESS_IMPORTS_SUCCESS = False
+else:
+    HEADLESS_IMPORTS_SUCCESS = False
+
+# Your Tkinter code here
 
 class MusicPlayer:
     def __init__(self, root):
@@ -38,9 +83,6 @@ class MusicPlayer:
         self.root.title("Gospel JukeBox")
         self.root.geometry("800x600")
         self.root.configure(bg="#f0f0f0")
-        
-        # Initialize pygame mixer
-        pygame.mixer.init()
         
         # Variables
         self.current_song = ""
@@ -53,7 +95,18 @@ class MusicPlayer:
         self.shuffle_mode = False
         self.volume = 0.5
         self.current_temp_file = None
-        pygame.mixer.music.set_volume(self.volume)
+        self.headless_mode = HEADLESS_MODE
+        self.headless_player = None
+        self.headless_thread = None
+        
+        # Initialize audio system
+        if not self.headless_mode:
+            try:
+                pygame.mixer.init()
+                pygame.mixer.music.set_volume(self.volume)
+            except pygame.error as e:
+                print(f"Warning: Failed to initialize pygame mixer: {e}")
+                self.headless_mode = True
         
         # Create main frames
         self.sidebar_frame = tk.Frame(self.root, bg="#2c3e50", width=200)
@@ -637,6 +690,7 @@ class MusicPlayer:
             # Clean up previous temporary file if it exists
             self.cleanup_temp_file()
             
+            # Get audio data - either from base64 or from file path
             if "audio_data" in song:
                 # Decode the base64 audio data
                 audio_bytes = base64.b64decode(song["audio_data"])
@@ -649,15 +703,47 @@ class MusicPlayer:
                 with open(temp_path, 'wb') as temp_file:
                     temp_file.write(audio_bytes)
                 
-                # Load the audio file using pygame
-                pygame.mixer.music.load(temp_path)
-                pygame.mixer.music.play()
-                
                 # Store the temp path for later cleanup
                 self.current_temp_file = temp_path
+                audio_path = temp_path
             else:
-                # Fallback to traditional path-based loading if audio_data is not available
-                pygame.mixer.music.load(song["path"])
+                # Use the file path directly
+                audio_path = song["path"]
+                
+            # Play the audio using the appropriate method based on environment
+            if self.headless_mode and HEADLESS_IMPORTS_SUCCESS:
+                # Stop any currently playing audio in headless mode
+                if self.headless_thread and self.headless_thread.is_alive():
+                    self.headless_player = None  # Signal the thread to stop
+                    self.headless_thread.join(timeout=1.0)
+                
+                # Use alternative audio playback for headless environments
+                def play_audio_headless():
+                    try:
+                        # Load audio file using pydub
+                        audio = AudioSegment.from_file(audio_path)
+                        # Convert to in-memory file-like object for soundfile
+                        data, samplerate = sf.read(audio_path)
+                        # Play audio using sounddevice
+                        sd.play(data, samplerate)
+                        # Keep reference to allow stopping
+                        self.headless_player = sd
+                        # Wait until playback is finished
+                        sd.wait()
+                        # If we completed playback naturally, play next song
+                        if self.headless_player is not None and not self.paused:
+                            # Schedule next song on main thread
+                            self.root.after(100, self.play_next)
+                    except Exception as e:
+                        print(f"Headless playback error: {e}")
+                
+                # Start playback in a separate thread
+                self.headless_thread = threading.Thread(target=play_audio_headless)
+                self.headless_thread.daemon = True
+                self.headless_thread.start()
+            else:
+                # Use pygame for normal environments
+                pygame.mixer.music.load(audio_path)
                 pygame.mixer.music.play()
             
             self.current_song = song["name"]
@@ -681,11 +767,26 @@ class MusicPlayer:
     def play_pause(self):
         if self.current_song:
             if self.paused:
-                pygame.mixer.music.unpause()
+                if self.headless_mode and HEADLESS_IMPORTS_SUCCESS:
+                    # Resume playback in headless mode
+                    if self.headless_thread and not self.headless_thread.is_alive():
+                        # Restart playback if thread has ended
+                        current_song = self.songs_list[self.current_song_index]
+                        self.play_song(current_song)
+                    else:
+                        # Just update the paused state
+                        self.paused = False
+                else:
+                    pygame.mixer.music.unpause()
                 self.play_pause_btn.config(text="⏸")
                 self.paused = False
             else:
-                pygame.mixer.music.pause()
+                if self.headless_mode and HEADLESS_IMPORTS_SUCCESS:
+                    # Pause playback in headless mode
+                    if self.headless_player:
+                        sd.stop()
+                else:
+                    pygame.mixer.music.pause()
                 self.play_pause_btn.config(text="▶")
                 self.paused = True
         elif self.songs_list:
@@ -736,39 +837,78 @@ class MusicPlayer:
     
     def set_volume(self, val):
         self.volume = float(val)
-        pygame.mixer.music.set_volume(self.volume)
+        if not self.headless_mode:
+            pygame.mixer.music.set_volume(self.volume)
     
     def volume_up(self):
         self.volume = min(1.0, self.volume + 0.1)
         self.volume_scale.set(self.volume)
-        pygame.mixer.music.set_volume(self.volume)
+        if not self.headless_mode:
+            pygame.mixer.music.set_volume(self.volume)
     
     def volume_down(self):
         self.volume = max(0.0, self.volume - 0.1)
         self.volume_scale.set(self.volume)
-        pygame.mixer.music.set_volume(self.volume)
+        if not self.headless_mode:
+            pygame.mixer.music.set_volume(self.volume)
     
     def seek(self, val):
         pass  # Implement seeking functionality
     
     def update_progress(self):
         while True:
-            if self.current_song and not self.paused and pygame.mixer.music.get_busy():
-                # Update progress bar
-                pass
-            elif self.current_song and not self.paused and not pygame.mixer.music.get_busy():
-                # Song ended, play next
-                self.play_next()
+            if self.headless_mode:
+                # In headless mode, check thread status
+                if self.current_song and not self.paused and self.headless_thread and self.headless_thread.is_alive():
+                    # Update progress bar
+                    pass
+                elif self.current_song and not self.paused and (not self.headless_thread or not self.headless_thread.is_alive()):
+                    # Only auto-advance if we're not in the middle of changing songs
+                    if hasattr(self, 'last_song_change_time') and time.time() - self.last_song_change_time > 2.0:
+                        # Song ended, play next
+                        self.play_next()
+            else:
+                # Normal pygame mode
+                if self.current_song and not self.paused and pygame.mixer.music.get_busy():
+                    # Update progress bar
+                    pass
+                elif self.current_song and not self.paused and not pygame.mixer.music.get_busy():
+                    # Song ended, play next
+                    self.play_next()
             time.sleep(0.1)
 
     def cleanup_temp_file(self):
         """Clean up temporary audio file"""
+        # Stop any playing audio
+        if self.headless_mode and HEADLESS_IMPORTS_SUCCESS:
+            # Stop headless playback
+            if self.headless_player:
+                try:
+                    sd.stop()
+                except Exception:
+                    pass
+                self.headless_player = None
+            
+            # Wait for thread to finish
+            if self.headless_thread and self.headless_thread.is_alive():
+                self.headless_thread.join(timeout=1.0)
+        else:
+            # Stop pygame playback
+            try:
+                if pygame.mixer.music.get_busy():
+                    pygame.mixer.music.stop()
+                    time.sleep(0.1)  # Give a small delay to ensure the file is released
+            except Exception:
+                pass
+        
+        # Remove temp file
         if hasattr(self, 'current_temp_file') and self.current_temp_file and os.path.exists(self.current_temp_file):
             try:
                 os.remove(self.current_temp_file)
                 self.current_temp_file = None
             except Exception as e:
-                print(f"Error removing temp file: {e}")
+                # If we can't remove it now, schedule it for removal on next play
+                print(f"Note: Temp file will be cleaned up later: {e}")
 
 # Main application
 def is_headless():
