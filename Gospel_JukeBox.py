@@ -14,14 +14,23 @@ from io import BytesIO
 import re
 import base64
 import tempfile
-# from pyvirtualdisplay import Display
-# display = Display(visible=0, size=(800, 600))
-# display.start()
+from pyvirtualdisplay import Display
+
+# ==================================================================
 
 # Your Tkinter code here
 
 if not os.environ.get("DISPLAY"):
     os.environ["DISPLAY"] = ":0.0"  # Assuming your display server is at :0.0
+
+
+# Start a virtual display (Xvfb) with the desired resolution.
+display = Display(visible=0, size=(1024, 768))
+display.start()
+
+
+root = tk.Tk()
+# ==================================================================
 
 class MusicPlayer:
     def __init__(self, root):
