@@ -20,6 +20,9 @@ import tempfile
 
 # Your Tkinter code here
 
+if not os.environ.get("DISPLAY"):
+    os.environ["DISPLAY"] = ":0.0"  # Assuming your display server is at :0.0
+
 class MusicPlayer:
     def __init__(self, root):
         self.root = root
