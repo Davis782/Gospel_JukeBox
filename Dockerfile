@@ -16,7 +16,3 @@ COPY . /app
 # Set the working directory to /app
 WORKDIR /app
 
-# Run the application; note the path depends on your repository structure.
-# If your Gospel_JukeBox.py is in the repository root (now in /app),
-# use "Gospel_JukeBox.py" instead of "app/Gospel_JukeBox.py".
-CMD ["python", "Gospel_JukeBox.py"]
