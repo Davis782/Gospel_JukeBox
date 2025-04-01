@@ -12,9 +12,11 @@ from PIL import Image, ImageTk
 import requests
 from io import BytesIO
 import re
-from pyvirtualdisplay import Display
-display = Display(visible=0, size=(800, 600))
-display.start()
+import base64
+import tempfile
+# from pyvirtualdisplay import Display
+# display = Display(visible=0, size=(800, 600))
+# display.start()
 
 # Your Tkinter code here
 
@@ -38,6 +40,7 @@ class MusicPlayer:
         self.repeat_mode = "no_repeat"  # Options: no_repeat, repeat_one, repeat_all
         self.shuffle_mode = False
         self.volume = 0.5
+        self.current_temp_file = None
         pygame.mixer.music.set_volume(self.volume)
         
         # Create main frames
@@ -155,7 +158,19 @@ class MusicPlayer:
             if filename.endswith(".mp3"):
                 filepath = os.path.join(directory, filename)
                 song_name = os.path.splitext(filename)[0]
-                self.songs_list.append({"name": song_name, "path": filepath})
+                
+                # Read the MP3 file as binary data and encode it as base64
+                try:
+                    with open(filepath, 'rb') as f:
+                        audio_data = f.read()
+                        audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                        self.songs_list.append({
+                            "name": song_name, 
+                            "path": filepath,  # Keep the path for reference
+                            "audio_data": audio_base64  # Store the base64 encoded audio data
+                        })
+                except Exception as e:
+                    print(f"Error loading {filepath}: {str(e)}")
         
         self.update_library_view()
     
@@ -244,7 +259,19 @@ class MusicPlayer:
         files = filedialog.askopenfilenames(filetypes=[("MP3 Files", "*.mp3")])
         for file in files:
             song_name = os.path.splitext(os.path.basename(file))[0]
-            self.songs_list.append({"name": song_name, "path": file})
+            
+            # Read the MP3 file as binary data and encode it as base64
+            try:
+                with open(file, 'rb') as f:
+                    audio_data = f.read()
+                    audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                    self.songs_list.append({
+                        "name": song_name, 
+                        "path": file,  # Keep the path for reference
+                        "audio_data": audio_base64  # Store the base64 encoded audio data
+                    })
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load {song_name}: {str(e)}")
         
         self.update_library_view()
     
@@ -595,8 +622,32 @@ class MusicPlayer:
     
     def play_song(self, song):
         try:
-            pygame.mixer.music.load(song["path"])
-            pygame.mixer.music.play()
+            # Clean up previous temporary file if it exists
+            self.cleanup_temp_file()
+            
+            if "audio_data" in song:
+                # Decode the base64 audio data
+                audio_bytes = base64.b64decode(song["audio_data"])
+                
+                # Create a temporary file to store the decoded audio data
+                # Use a unique filename based on song name to avoid conflicts
+                temp_dir = tempfile.gettempdir()
+                temp_path = os.path.join(temp_dir, f"temp_audio_{hash(song['name'])}.mp3")
+                
+                with open(temp_path, 'wb') as temp_file:
+                    temp_file.write(audio_bytes)
+                
+                # Load the audio file using pygame
+                pygame.mixer.music.load(temp_path)
+                pygame.mixer.music.play()
+                
+                # Store the temp path for later cleanup
+                self.current_temp_file = temp_path
+            else:
+                # Fallback to traditional path-based loading if audio_data is not available
+                pygame.mixer.music.load(song["path"])
+                pygame.mixer.music.play()
+            
             self.current_song = song["name"]
             self.current_song_label.config(text=song["name"])
             self.play_pause_btn.config(text="⏸")
@@ -698,6 +749,15 @@ class MusicPlayer:
                 self.play_next()
             time.sleep(0.1)
 
+    def cleanup_temp_file(self):
+        """Clean up temporary audio file"""
+        if hasattr(self, 'current_temp_file') and self.current_temp_file and os.path.exists(self.current_temp_file):
+            try:
+                os.remove(self.current_temp_file)
+                self.current_temp_file = None
+            except Exception as e:
+                print(f"Error removing temp file: {e}")
+
 # Main application
 def is_headless():
     """Check if the script is running in a headless environment"""
@@ -735,8 +795,19 @@ if __name__ == "__main__":
         # Tkinter application
         root = tk.Tk()
         app = MusicPlayer(root)
+        
+        # Add cleanup on window close
+        def on_closing():
+            app.cleanup_temp_file()
+            root.destroy()
+            
+        root.protocol("WM_DELETE_WINDOW", on_closing)
         root.mainloop()
     finally:
+        # Clean up any temporary files
+        if 'app' in locals():
+            app.cleanup_temp_file()
+            
         # Stop virtual display
         if display:
             print("Stopping virtual display...")
