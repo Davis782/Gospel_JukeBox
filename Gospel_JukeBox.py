@@ -12,6 +12,11 @@ from PIL import Image, ImageTk
 import requests
 from io import BytesIO
 import re
+from pyvirtualdisplay import Display
+display = Display(visible=0, size=(800, 600))
+display.start()
+
+# Your Tkinter code here
 
 class MusicPlayer:
     def __init__(self, root):
@@ -698,45 +703,41 @@ def is_headless():
     """Check if the script is running in a headless environment"""
     return os.environ.get('DISPLAY', '') == ''
 
-def run_with_virtual_display():
-    """Run the application with a virtual display using PyVirtualDisplay"""
-    try:
-        from pyvirtualdisplay import Display
-        print("Starting virtual display...")
-        display = Display(visible=0, size=(1024, 768))
-        display.start()
-        print(f"Virtual display started with ID: {display.display}")
-        return display
-    except ImportError:
-        print("PyVirtualDisplay not installed. Installing...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "pyvirtualdisplay"])
-        from pyvirtualdisplay import Display
-        display = Display(visible=0, size=(1024, 768))
-        display.start()
-        return display
-    except Exception as e:
-        print(f"Error starting virtual display: {e}")
-        print("Xvfb might not be installed on this system.")
-        print("On Linux systems, install with: sudo apt-get install xvfb")
-        print("On Windows, this approach may not work as Xvfb is not natively supported.")
-        sys.exit(1)
-
 if __name__ == "__main__":
     # Check if we need a virtual display
     display = None
-    headless_mode = is_headless()
     
     # Check for command line arguments
     if '--headless' in sys.argv:
         print("Running in headless mode...")
-        display = run_with_virtual_display()
+        try:
+            from pyvirtualdisplay import Display
+            
+            # Start virtual display
+            display = Display(visible=0, size=(800, 600))
+            display.start()
+            print(f"Virtual display started with ID: {display.display}")
+            
+        except ImportError:
+            print("PyVirtualDisplay not installed. Installing...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "pyvirtualdisplay"])
+            from pyvirtualdisplay import Display
+            display = Display(visible=0, size=(800, 600))
+            display.start()
+        except Exception as e:
+            print(f"Error starting virtual display: {e}")
+            print("Xvfb might not be installed on this system.")
+            print("On Linux systems, install with: sudo apt-get install xvfb")
+            print("On Windows, this approach may not work as Xvfb is not natively supported.")
+            sys.exit(1)
     
     try:
+        # Tkinter application
         root = tk.Tk()
         app = MusicPlayer(root)
         root.mainloop()
     finally:
-        # Clean up the virtual display if it was created
+        # Stop virtual display
         if display:
             print("Stopping virtual display...")
             display.stop()
