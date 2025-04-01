@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 import pygame
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
@@ -488,6 +490,7 @@ class MusicPlayer:
         theme_label = tk.Label(theme_frame, text="Theme:", bg="white", font=("Helvetica", 10, "bold"))
         theme_label.grid(row=0, column=0, sticky="w", padx=5, pady=5)
         
+        
         self.theme_var = tk.StringVar(value="light")
         light_radio = tk.Radiobutton(theme_frame, text="Light", variable=self.theme_var, value="light", bg="white", command=self.apply_theme)
         light_radio.grid(row=0, column=1, sticky="w", padx=5, pady=5)
@@ -691,7 +694,49 @@ class MusicPlayer:
             time.sleep(0.1)
 
 # Main application
+def is_headless():
+    """Check if the script is running in a headless environment"""
+    return os.environ.get('DISPLAY', '') == ''
+
+def run_with_virtual_display():
+    """Run the application with a virtual display using PyVirtualDisplay"""
+    try:
+        from pyvirtualdisplay import Display
+        print("Starting virtual display...")
+        display = Display(visible=0, size=(1024, 768))
+        display.start()
+        print(f"Virtual display started with ID: {display.display}")
+        return display
+    except ImportError:
+        print("PyVirtualDisplay not installed. Installing...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "pyvirtualdisplay"])
+        from pyvirtualdisplay import Display
+        display = Display(visible=0, size=(1024, 768))
+        display.start()
+        return display
+    except Exception as e:
+        print(f"Error starting virtual display: {e}")
+        print("Xvfb might not be installed on this system.")
+        print("On Linux systems, install with: sudo apt-get install xvfb")
+        print("On Windows, this approach may not work as Xvfb is not natively supported.")
+        sys.exit(1)
+
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = MusicPlayer(root)
-    root.mainloop()
+    # Check if we need a virtual display
+    display = None
+    headless_mode = is_headless()
+    
+    # Check for command line arguments
+    if '--headless' in sys.argv:
+        print("Running in headless mode...")
+        display = run_with_virtual_display()
+    
+    try:
+        root = tk.Tk()
+        app = MusicPlayer(root)
+        root.mainloop()
+    finally:
+        # Clean up the virtual display if it was created
+        if display:
+            print("Stopping virtual display...")
+            display.stop()
