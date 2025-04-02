@@ -11,6 +11,22 @@ import requests
 from io import BytesIO
 import re
 
+
+# =====================================Headless===========================
+
+# Check if we are in a headless environment
+if os.environ.get('HEADLESS', '0') == '1':
+    # Skip GUI initialization or run in a different mode
+    print("Running in headless mode. GUI will not be initialized.")
+else:
+    # Initialize Tkinter GUI
+    root = tk.Tk()
+    app = MusicPlayer(root)
+    root.mainloop()
+
+
+# =====================================Headless===========================
+
 class MusicPlayer:
     def __init__(self, root):
         self.root = root
