@@ -1,12 +1,1 @@
-flet>=0.9.0
-pygame>=2.0.0
-python-dotenv>=1.0.0
-bcrypt
-Pillow>=10.0.0
-requests>=2.31.0
-pyvirtualdisplay>=3.0
-pydub==0.25.1
-sounddevice==0.5.1
-soundfile==0.13.1
-playsound>=0.9.0
 streamlit>=0.72.0
