@@ -1,9 +1,6 @@
 import flet as ft
 import os
-import pygame
-
-# Initialize Pygame mixer
-pygame.mixer.init()
+from playsound import playsound
 
 class AudioPlayerApp:
     def __init__(self, page: ft.Page):
@@ -12,6 +9,7 @@ class AudioPlayerApp:
         self.page.padding = 20
         self.mp3_directory = "mp3_files"
 
+        # Ensure the directory exists
         if not os.path.exists(self.mp3_directory):
             os.makedirs(self.mp3_directory)
 
@@ -38,8 +36,7 @@ class AudioPlayerApp:
     def play_audio(self, file_path):
         """Play the selected audio file."""
         try:
-            pygame.mixer.music.load(file_path)
-            pygame.mixer.music.play()
+            playsound(file_path)
         except Exception as e:
             self.page.add(ft.Text(f"Error playing audio: {e}"))
 
