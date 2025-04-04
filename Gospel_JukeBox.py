@@ -389,3 +389,4 @@ def main():
     display_mp3_player()  # Display the MP3 player section
 
 if __name__ == "__main__":
+    main()
