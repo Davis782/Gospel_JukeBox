@@ -202,7 +202,7 @@ def display_music_library():
         with st.expander("Preview Lyrics", expanded=True):  # Set to expanded=True to show lyrics by default
             if lyrics != "No lyrics available.":
                 st.markdown(
-                    f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 300px; overflow-y: auto; color: white;'>{lyrics.replace('\n', '<br>')}</div>",
+                    f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 300px; overflow-y: auto; color: white;'>{lyrics.replace(r'\n', '<br>')}</div>",
                     unsafe_allow_html=True
                 )
             else:
