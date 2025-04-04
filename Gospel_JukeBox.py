@@ -253,7 +253,7 @@ def display_now_playing():
         st.markdown("### Lyrics")
         if st.session_state.current_lyrics and st.session_state.current_lyrics != "No lyrics available.":
             st.markdown(
-                f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 400px; overflow-y: auto; color: white;'>{st.session_state.current_lyrics.replace('\n', '<br>')}</div>",
+                f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 400px; overflow-y: auto; color: white;'>{st.session_state.current_lyrics.replace(r'\n', '<br>')}</div>",
                 unsafe_allow_html=True
             )
         else:
