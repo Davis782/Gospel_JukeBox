@@ -46,36 +46,26 @@ def encode_audio_to_base64(file_path):
         return None
 
 def play_audio(file_path, song_name):
-    """Plays an audio file in Streamlit using the audio component."""
+    """Updates the current song in session state without interrupting playback."""
     try:
-        with open(file_path, "rb") as audio_file:
-            audio_data = audio_file.read()
-            b64 = base64.b64encode(audio_data).decode()
-            audio_html = f"""
-                <div style="background-color: #f0f2f6; padding: 10px; border-radius: 10px; margin-bottom: 10px;">
-                    <h3 style="color: #1e3a8a; margin-bottom: 10px;">Now Playing: {song_name}</h3>
-                    <audio controls style="width: 100%;">
-                        <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                    </audio>
-                </div>
-            """
-            st.markdown(audio_html, unsafe_allow_html=True)
-            
-            # Update session state
-            st.session_state.current_song = song_name
-            st.session_state.play_time = datetime.now().strftime("%H:%M:%S")
-            
-            # Load and store lyrics
-            lyrics = load_lyrics(file_path)
-            st.session_state.current_lyrics = lyrics
-            
-            # Add to history if not already the last item
-            if not st.session_state.history or st.session_state.history[-1] != song_name:
-                st.session_state.history.append(song_name)
-                # Keep history to last 10 items
-                if len(st.session_state.history) > 10:
-                    st.session_state.history = st.session_state.history[-10:]
+        # Update session state without recreating the audio player
+        # This allows the persistent player to handle the actual playback
+        st.session_state.current_song = song_name
+        st.session_state.play_time = datetime.now().strftime("%H:%M:%S")
+        
+        # Load and store lyrics
+        lyrics = load_lyrics(file_path)
+        st.session_state.current_lyrics = lyrics
+        
+        # Add to history if not already the last item
+        if not st.session_state.history or st.session_state.history[-1] != song_name:
+            st.session_state.history.append(song_name)
+            # Keep history to last 10 items
+            if len(st.session_state.history) > 10:
+                st.session_state.history = st.session_state.history[-10:]
+                
+        # Force a rerun to update the persistent player
+        st.rerun()
     except FileNotFoundError:
         st.error(f"File not found: {file_path}")
     except Exception as e:
@@ -124,6 +114,46 @@ def clear_queue():
     """Clear the entire queue."""
     st.session_state.queue = []
 
+def display_persistent_player():
+    """Display a persistent audio player at the top of the app."""
+    if st.session_state.current_song:
+        # Create a container with a fixed style for the persistent player
+        with st.container():
+            st.markdown(
+                """<style>
+                .persistent-player {
+                    position: sticky;
+                    top: 0;
+                    z-index: 999;
+                    background-color: #f0f2f6;
+                    padding: 10px;
+                    border-radius: 10px;
+                    margin-bottom: 15px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+                </style>""", 
+                unsafe_allow_html=True
+            )
+            
+            # Display the persistent player
+            file_path = os.path.join(MP3_DIR, st.session_state.current_song)
+            try:
+                with open(file_path, "rb") as audio_file:
+                    audio_data = audio_file.read()
+                    b64 = base64.b64encode(audio_data).decode()
+                    audio_html = f"""
+                        <div class="persistent-player">
+                            <h4 style="color: #1e3a8a; margin-bottom: 5px;">Now Playing: {st.session_state.current_song.replace('.mp3', '')}</h4>
+                            <audio controls style="width: 100%;" autoplay>
+                                <source src="data:audio/mpeg;base64,{b64}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                    """
+                    st.markdown(audio_html, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"Error loading audio: {e}")
+
 def display_mp3_player():
     # Sidebar for navigation and app info
     with st.sidebar:
@@ -140,6 +170,9 @@ def display_mp3_player():
             f'<a href="{cashapp_url}" target="_blank"><button style="background-color:#00D632; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer; width:100%;">Donate with Cash App</button></a>',
             unsafe_allow_html=True,
         )
+    
+    # Display the persistent player at the top of every page
+    display_persistent_player()
     
     # Main content area
     if page == "Music Library":
@@ -356,4 +389,3 @@ def main():
     display_mp3_player()  # Display the MP3 player section
 
 if __name__ == "__main__":
-    main()
