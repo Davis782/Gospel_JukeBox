@@ -201,8 +201,9 @@ def display_music_library():
         # Display lyrics in an expander
         with st.expander("Preview Lyrics", expanded=True):  # Set to expanded=True to show lyrics by default
             if lyrics != "No lyrics available.":
+                lyrics_html = lyrics.replace('\n', '<br>')  # Perform replacement before inserting into f-string
                 st.markdown(
-                    f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 300px; overflow-y: auto; color: white;'>{lyrics.replace('\\n', '<br>')}</div>",
+                    f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 300px; overflow-y: auto; color: white;'>{lyrics_html}</div>",
                     unsafe_allow_html=True
                 )
             else:
@@ -252,8 +253,9 @@ def display_now_playing():
         # Display lyrics in a nice format
         st.markdown("### Lyrics")
         if st.session_state.current_lyrics and st.session_state.current_lyrics != "No lyrics available.":
+            lyrics_html = st.session_state.current_lyrics.replace('\n', '<br>')  # Perform replacement before inserting into f-string
             st.markdown(
-                f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 400px; overflow-y: auto; color: white;'>{st.session_state.current_lyrics.replace('\\n', '<br>')}</div>",
+                f"<div style='background-color: #000000; padding: 20px; border-radius: 10px; max-height: 400px; overflow-y: auto; color: white;'>{lyrics_html}</div>",
                 unsafe_allow_html=True
             )
         else:
