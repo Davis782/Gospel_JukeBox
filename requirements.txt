@@ -1,1 +1,5 @@
 streamlit>=0.72.0
+flet>=0.9.0
+pygame>=2.5.0
+pillow>=10.0.0
+mutagen==1.47.0
