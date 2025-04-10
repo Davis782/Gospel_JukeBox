@@ -129,6 +129,7 @@ def add_to_queue(song_name):
         st.session_state.queue.append(song_name)  # Add song to queue
         st.session_state.queue = list(set(st.session_state.queue))  # Ensure unique entries
         st.session_state.queue_updated = True  # Flag for UI refresh
+        st.rerun()  # Force UI refresh immediately to show the updated queue
         return True
     return False
 
@@ -228,11 +229,12 @@ def display_mp3_player():
         
         # Display countdown timer for next song with enhanced information
         if st.session_state.audio_playing and st.session_state.current_song and st.session_state.song_start_timestamp:
+            # Calculate initial values for display
             current_time = datetime.now()
             song_play_duration = (current_time - st.session_state.song_start_timestamp).total_seconds()
             remaining_time = max(0, st.session_state.estimated_song_duration - song_play_duration)
             
-            # Format times as MM:SS
+            # Format times as MM:SS for initial display
             minutes_elapsed = int(song_play_duration // 60)
             seconds_elapsed = int(song_play_duration % 60)
             elapsed_display = f"{minutes_elapsed:02d}:{seconds_elapsed:02d}"
@@ -247,34 +249,124 @@ def display_mp3_player():
             
             # Create a progress bar for visual feedback
             progress = min(1.0, song_play_duration / st.session_state.estimated_song_duration)
-            st.progress(progress)
+            progress_bar = st.progress(progress)
             
-            # Show comprehensive timing information
-            st.markdown(f"**Current Song Time**: {elapsed_display} / {total_display}")
+            # Create a container for the countdown display
+            countdown_container = st.empty()
+            message_container = st.empty()
+            caption_container = st.empty()
             
-            # Show countdown with appropriate message based on autoplay setting and remaining time
-            if remaining_time <= 0:
-                # Song has reached its estimated end time
-                if st.session_state.autoplay and st.session_state.queue:
-                    st.markdown(f"**<span style='color:green'>Next song should be playing now!</span>**", unsafe_allow_html=True)
-                    st.caption(f"If music hasn't changed, click 'Force Next Song' below")
-                elif st.session_state.autoplay and not st.session_state.queue:
-                    st.markdown(f"**<span style='color:orange'>Song has ended!</span>**", unsafe_allow_html=True)
-                    st.caption("No songs in queue for autoplay")
-                else:
-                    st.markdown(f"**<span style='color:orange'>Song has ended!</span>**", unsafe_allow_html=True)
-                    st.caption("Autoplay is disabled. Please select the next song manually.")
-            else:
-                # Song is still playing
-                if st.session_state.autoplay and st.session_state.queue:
-                    st.markdown(f"**Next song in**: {remaining_display}")
-                    st.caption(f"Autoplay will start the next song automatically")
-                elif st.session_state.autoplay and not st.session_state.queue:
-                    st.markdown(f"**Song ends in**: {remaining_display}")
-                    st.caption("No songs in queue for autoplay")
-                else:
-                    st.markdown(f"**Song ends in**: {remaining_display}")
-                    st.caption("Autoplay is disabled")
+            # Create JavaScript-based auto-updating timer
+            # This will update the countdown without requiring user interaction
+            start_time_ms = int(st.session_state.song_start_timestamp.timestamp() * 1000)
+            estimated_duration_ms = st.session_state.estimated_song_duration * 1000
+            
+            # Determine the message to display based on autoplay setting and queue status
+            autoplay_enabled = "true" if st.session_state.autoplay else "false"
+            has_queue = "true" if st.session_state.queue else "false"
+            
+            # Create HTML component with JavaScript for auto-updating timer
+            timer_html = f"""
+            <div id="timer-display" style="font-family: sans-serif; margin-bottom: 10px;"></div>
+            <div id="message-display" style="font-family: sans-serif; font-weight: bold;"></div>
+            <div id="caption-display" style="font-family: sans-serif; font-size: 0.8em; color: #666;"></div>
+            <div id="progress-container" style="display: none;">0</div>
+            
+            <script>
+                // Timer configuration
+                const startTimeMs = {start_time_ms};
+                const estimatedDurationMs = {estimated_duration_ms};
+                const autoplayEnabled = {autoplay_enabled};
+                const hasQueue = {has_queue};
+                
+                // Function to format time as MM:SS
+                function formatTime(seconds) {{
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${{mins.toString().padStart(2, '0')}}:${{secs.toString().padStart(2, '0')}}`;
+                }}
+                
+                // Function to update the timer display
+                function updateTimer() {{
+                    const currentTimeMs = new Date().getTime();
+                    const elapsedTimeMs = currentTimeMs - startTimeMs;
+                    const elapsedTimeSec = elapsedTimeMs / 1000;
+                    const remainingTimeSec = Math.max(0, {st.session_state.estimated_song_duration} - elapsedTimeSec);
+                    const totalTimeSec = {st.session_state.estimated_song_duration};
+                    
+                    // Update progress
+                    const progress = Math.min(1.0, elapsedTimeSec / totalTimeSec);
+                    document.getElementById('progress-container').innerText = progress.toFixed(4);
+                    
+                    // Update elapsed/total time display
+                    document.getElementById('timer-display').innerHTML = 
+                        `<strong>Current Song Time</strong>: ${{formatTime(elapsedTimeSec)}} / ${{formatTime(totalTimeSec)}}`;
+                    
+                    // Update message based on remaining time and settings
+                    let messageHTML = '';
+                    let captionText = '';
+                    
+                    if (remainingTimeSec <= 0) {{
+                        // Song has reached its estimated end time
+                        if (autoplayEnabled && hasQueue) {{
+                            messageHTML = `<span style='color:green'>Next song should be playing now!</span>`;
+                            captionText = `If music hasn't changed, click 'Force Next Song' below`;
+                        }} else if (autoplayEnabled && !hasQueue) {{
+                            messageHTML = `<span style='color:orange'>Song has ended!</span>`;
+                            captionText = `No songs in queue for autoplay`;
+                        }} else {{
+                            messageHTML = `<span style='color:orange'>Song has ended!</span>`;
+                            captionText = `Autoplay is disabled. Please select the next song manually.`;
+                        }}
+                    }} else {{
+                        // Song is still playing
+                        if (autoplayEnabled && hasQueue) {{
+                            messageHTML = `Next song in: ${{formatTime(remainingTimeSec)}}`;
+                            captionText = `Autoplay will start the next song automatically`;
+                        }} else if (autoplayEnabled && !hasQueue) {{
+                            messageHTML = `Song ends in: ${{formatTime(remainingTimeSec)}}`;
+                            captionText = `No songs in queue for autoplay`;
+                        }} else {{
+                            messageHTML = `Song ends in: ${{formatTime(remainingTimeSec)}}`;
+                            captionText = `Autoplay is disabled`;
+                        }}
+                    }}
+                    
+                    document.getElementById('message-display').innerHTML = messageHTML;
+                    document.getElementById('caption-display').innerText = captionText;
+                }}
+                
+                // Update immediately and then every 1 second
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            </script>
+            """
+            
+            # Display the auto-updating timer
+            st.components.v1.html(timer_html, height=100)
+            
+            # JavaScript to Python communication for progress bar updates
+            # This is a workaround since we can't directly update Streamlit elements from JavaScript
+            # We'll use a periodic check to update the progress bar based on the JavaScript calculation
+            js_progress_html = """
+            <script>
+                // Function to periodically update the progress value in the DOM
+                function updateProgressValue() {
+                    const progressContainer = document.getElementById('progress-container');
+                    if (progressContainer) {
+                        const currentTimeMs = new Date().getTime();
+                        const elapsedTimeMs = currentTimeMs - %s;
+                        const elapsedTimeSec = elapsedTimeMs / 1000;
+                        const progress = Math.min(1.0, elapsedTimeSec / %s);
+                        progressContainer.innerText = progress.toFixed(4);
+                    }
+                    setTimeout(updateProgressValue, 500); // Update twice per second
+                }
+                updateProgressValue();
+            </script>
+            """ % (start_time_ms, st.session_state.estimated_song_duration)
+            
+            st.components.v1.html(js_progress_html, height=0)
             
             # Add a small spacer
             st.write("")
