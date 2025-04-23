@@ -56,6 +56,18 @@ def init_db():
         )
     ''')
     
+    # Create song_notes table if it doesn't exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS song_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            song_name TEXT NOT NULL,
+            username TEXT,
+            label TEXT,
+            notes TEXT,
+            last_updated TIMESTAMP
+        )
+    ''')
+    
     # Add default admin user if not exists
     cursor.execute("SELECT * FROM users WHERE username = 'admin'")
     if not cursor.fetchone():
