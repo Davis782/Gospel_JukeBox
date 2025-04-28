@@ -58,13 +58,23 @@ def init_db():
         )
     ''')
     
+    # --- MIGRATION: Add 'is_admin' column if missing for legacy DBs ---
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'is_admin' not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+    
     # Add default admin user if not exists
     cursor.execute("SELECT * FROM users WHERE username = 'admin'")
     if not cursor.fetchone():
         # Simple password storage for demo purposes
         # In production, use password hashing
-        cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", 
-                      ('admin', 'admin123', 1))
+        cursor.execute("PRAGMA table_info(users)")
+        cols = [col[1] for col in cursor.fetchall()]
+        if 'role' in cols:
+            cursor.execute("INSERT INTO users (username, password, is_admin, role) VALUES (?, ?, ?, ?)", ('admin', 'admin123', 1, 'admin'))
+        else:
+            cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", ('admin', 'admin123', 1))
     
     # --- MIGRATION: Add 'label' and 'creator_username' columns if missing (for legacy DBs) ---
     try:
@@ -583,7 +593,7 @@ def display_music_library():
     mp3_files = load_content()
 
     # Add search functionality
-    search_query = st.text_input("Search songs by title or label", "")
+    search_query = st.text_input("Search songs by title, sheet music label, or note label", "")
     
     # Filter songs based on search query
     if search_query:
@@ -600,12 +610,24 @@ def display_music_library():
         label_matches = [f"{row[0]}" for row in cursor.fetchall() if f"{row[0]}" in mp3_files]
         conn.close()
         
+        # Also search by note labels in song_notes
+        conn = sqlite3.connect('Gospel_Jukebox.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT DISTINCT song_name FROM song_notes WHERE label LIKE ?", (f'%{search_query}%',)
+        )
+        note_matches = [row[0] for row in cursor.fetchall() if row[0] in mp3_files]
+        conn.close()
+        
         # Combine results from both searches and remove duplicates
-        filtered_songs = list(set(filtered_songs + label_matches))
+        filtered_songs = list(set(filtered_songs + label_matches + note_matches))
         
         # Display which songs were found by label if any were found this way
         if label_matches and not any(search_query.lower() in song.lower() for song in label_matches):
             st.info(f"Found {len(label_matches)} song(s) with label matching '{search_query}' click dropdown below to view")
+        # Inform user about note label matches
+        if note_matches and not any(search_query.lower() in song.lower() for song in note_matches):
+            st.info(f"Found {len(note_matches)} song(s) with note label matching '{search_query}', click dropdown to view")
     else:
         filtered_songs = mp3_files
     
@@ -733,6 +755,7 @@ def display_music_library():
 
     show_lyrics_state = st.session_state.get('song_btn_state') in ['show_lyrics', 'play_song']
     if st.session_state.current_song or show_lyrics_state:
+        st.session_state.current_song = selected_song  # ensure current song is set for DB queries
         st.subheader(f" {selected_song.replace('.mp3', '')}")
         if st.session_state.audio_playing and st.session_state.current_song:
             st.write(f"Started playing at: {st.session_state.play_time}")
@@ -767,20 +790,42 @@ def display_music_library():
                 conn.close()
 
                 if all_notes:
-                    st.markdown("**Existing Notes:**")
-                    notes_container = st.container() # Use a container for better layout control
-                    with notes_container:
-                        for user, label, note_content in all_notes:
-                            display_label = label if label else '[No Label]'
-                            # Display each note in a read-only text area within the container
-                            st.text_area(
-                                f"Note by {user} ({display_label})", 
-                                value=note_content if note_content else "", 
-                                height=100, 
-                                key=f"note_display_{user}_{label}", 
-                                disabled=True # Make it read-only for now
+                    # Prepare filtered notes by label
+                    unique_labels = sorted({lbl for _, lbl, _ in all_notes if lbl})
+                    note_view_mode = st.radio(
+                        "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
+                    )
+                    if note_view_mode == "Labels only":
+                        st.markdown("**Note Labels:**")
+                        if unique_labels:
+                            for lbl in unique_labels:
+                                st.write(f"- {lbl}")
+                        else:
+                            st.info("No labels to display.")
+                    else:
+                        # Determine which notes to show
+                        if note_view_mode == "Filter by label" and unique_labels:
+                            selected_note_label = st.selectbox(
+                                "Select label to filter notes", unique_labels, key="note_label_filter_select"
                             )
-                            st.markdown("--- *end of note* ---") # Separator
+                            filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
+                        else:
+                            filtered_notes = all_notes
+
+                        st.markdown("**Existing Notes:**")
+                        notes_container = st.container()  # Use a container for better layout control
+                        with notes_container:
+                            for user, label, note_content in filtered_notes:
+                                display_label = label if label else '[No Label]'
+                                # Display each note in a read-only text area within the container
+                                st.text_area(
+                                    f"Note by {user} ({display_label})", 
+                                    value=note_content if note_content else "", 
+                                    height=100, 
+                                    key=f"note_display_{user}_{label}", 
+                                    disabled=True # Make it read-only for now
+                                )
+                                st.markdown("--- *end of note* ---") # Separator
                 else:
                     st.info("No notes found for this song yet.")
 
