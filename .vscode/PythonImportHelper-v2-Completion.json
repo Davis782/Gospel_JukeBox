@@ -76,6 +76,276 @@
         "documentation": {}
     },
     {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "sqlite3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sqlite3",
+        "description": "sqlite3",
+        "detail": "sqlite3",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "base64",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "base64",
+        "description": "base64",
+        "detail": "base64",
+        "documentation": {}
+    },
+    {
+        "label": "streamlit",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "components",
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "isExtraImport": true,
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "components",
+        "importPath": "streamlit",
+        "description": "streamlit",
+        "isExtraImport": true,
+        "detail": "streamlit",
+        "documentation": {}
+    },
+    {
+        "label": "matplotlib.pyplot",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "matplotlib.pyplot",
+        "description": "matplotlib.pyplot",
+        "detail": "matplotlib.pyplot",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "create_client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "Client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "create_client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "Client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "webbrowser",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "webbrowser",
+        "description": "webbrowser",
+        "detail": "webbrowser",
+        "documentation": {}
+    },
+    {
+        "label": "pygame",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pygame",
+        "description": "pygame",
+        "detail": "pygame",
+        "documentation": {}
+    },
+    {
+        "label": "tkinter",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "ttk",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "filedialog",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "messagebox",
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "isExtraImport": true,
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageTk",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "requests",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "requests",
+        "description": "requests",
+        "detail": "requests",
+        "documentation": {}
+    },
+    {
+        "label": "BytesIO",
+        "importPath": "io",
+        "description": "io",
+        "isExtraImport": true,
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
         "label": "index",
         "kind": 2,
         "importPath": "Sandbox_Files.Unused_Test_Files.app",
@@ -157,11 +427,326 @@
         "documentation": {}
     },
     {
-        "label": "GospelJukeBox",
+        "label": "DatabaseManager",
         "kind": 6,
+        "importPath": "db_manager",
+        "description": "db_manager",
+        "peekOfCode": "class DatabaseManager:\n    \"\"\"Manages SQLite database operations for the Gospel JukeBox application.\"\"\"\n    def __init__(self, db_path):\n        \"\"\"Initialize the database manager with the database file path.\"\"\"\n        self.db_path = db_path\n        self.conn = None\n        self.cursor = None\n        self.initialize_database()\n    def connect(self):\n        \"\"\"Establish a connection to the SQLite database.\"\"\"",
+        "detail": "db_manager",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "db_manager",
+        "description": "db_manager",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nclass DatabaseManager:\n    \"\"\"Manages SQLite database operations for the Gospel JukeBox application.\"\"\"\n    def __init__(self, db_path):\n        \"\"\"Initialize the database manager with the database file path.\"\"\"\n        self.db_path = db_path\n        self.conn = None\n        self.cursor = None\n        self.initialize_database()\n    def connect(self):",
+        "detail": "db_manager",
+        "documentation": {}
+    },
+    {
+        "label": "init_db",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS votes (\n            song_name TEXT,\n            vote INTEGER\n        )\n    ''')",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "get_labels_for_song_instrument",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def get_labels_for_song_instrument(song_name, instrument):\n    \"\"\"Return a list of (label, creator_username) for a given song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?\", (song_name, instrument))\n    labels = [(row[0], row[1] if row[1] else 'Unknown') for row in cursor.fetchall() if row[0]]\n    conn.close()\n    return labels\ndef add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "add_label",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\n        \"INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)\",\n        (song_name, instrument, label, '', creator_username)\n    )\n    conn.commit()\n    conn.close()",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "delete_label",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def delete_label(song_name, instrument, label):\n    \"\"\"Delete a label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?\", (song_name, instrument, label))\n    conn.commit()\n    conn.close()\ndef get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "get_label_notes",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT username, notes, last_updated FROM song_notes WHERE song_name = ? AND label = ?\", (song_name, label))\n    notes = cursor.fetchall()\n    conn.close()\n    return notes\n# --- End Label Management Helpers ---\n# Initialize Supabase connection if environment variables are available",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "encode_audio_to_base64",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def encode_audio_to_base64(file_path):\n    \"\"\"Encode audio to base64.\"\"\"\n    with open(file_path, \"rb\") as audio_file:\n        return base64.b64encode(audio_file.read()).decode('utf-8')\ndef play_audio(file_path, song_name):\n    \"\"\"Play an audio file. Ensures play button is always responsive.\"\"\"\n    # Always reset audio state for new playback\n    st.session_state.audio_playing = False\n    st.session_state.current_song = None\n    st.session_state.audio_data = None",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "play_audio",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def play_audio(file_path, song_name):\n    \"\"\"Play an audio file. Ensures play button is always responsive.\"\"\"\n    # Always reset audio state for new playback\n    st.session_state.audio_playing = False\n    st.session_state.current_song = None\n    st.session_state.audio_data = None\n    # DO NOT reset or modify st.session_state.queue here!\n    # Now set new state\n    st.session_state.audio_data = encode_audio_to_base64(file_path)\n    st.session_state.audio_playing = True",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "load_content",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def load_content():\n    \"\"\"Load songs from directories.\"\"\"\n    return sorted(f for f in os.listdir(MP3_DIR) if f.endswith('.mp3'))\ndef load_lyrics(file_path):\n    \"\"\"Load lyrics from a corresponding text file.\"\"\"\n    text_file_path = os.path.splitext(file_path)[0] + '.txt'\n    return open(text_file_path).read() if os.path.exists(text_file_path) else \"No lyrics available.\"\ndef add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "load_lyrics",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def load_lyrics(file_path):\n    \"\"\"Load lyrics from a corresponding text file.\"\"\"\n    text_file_path = os.path.splitext(file_path)[0] + '.txt'\n    return open(text_file_path).read() if os.path.exists(text_file_path) else \"No lyrics available.\"\ndef add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness\n    if song_name not in st.session_state.queue:\n        st.session_state.queue.append(song_name)\n        st.session_state.queue_updated = True",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "add_to_queue",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness\n    if song_name not in st.session_state.queue:\n        st.session_state.queue.append(song_name)\n        st.session_state.queue_updated = True\n        st.session_state['autoplay_queue_empty_warned'] = False\n        try:\n            st.rerun()\n        except AttributeError:",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "play_from_queue",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def play_from_queue(index, remove_after_playing=True):\n    \"\"\"Play a song from the queue. Removes it unless told not to (for replay mode or Next Song button).\"\"\"\n    if 0 <= index < len(st.session_state.queue):\n        song_name = st.session_state.queue[index]\n        play_audio(os.path.join(MP3_DIR, song_name), song_name)\n        # If force_next_song_active is True, do NOT remove from queue (manual next song)\n        # If force_next_song_active is False (autoplay), DO remove from queue\n        if remove_after_playing:\n            if not st.session_state.get('force_next_song_active', False):\n                st.session_state.queue.pop(index)",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "display_mp3_player",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def display_mp3_player():\n    \"\"\"Display the MP3 player in the sidebar.\"\"\"\n    # Get current time\n    current_time = datetime.now()\n    # Check if song has ended on every Streamlit refresh\n    # This makes the autoplay more responsive than the 20-second interval\n    if st.session_state.audio_playing and st.session_state.current_song and st.session_state.song_start_timestamp:\n        # Calculate how long the song has been playing\n        song_play_duration = (current_time - st.session_state.song_start_timestamp).total_seconds()\n        # If song has been playing longer than the estimated duration, mark it as ended",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "display_music_library",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def display_music_library():\n    \"\"\"Display the music library page.\"\"\"\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Add search functionality\n    search_query = st.text_input(\"Search songs by title, sheet music label, or note label\", \"\")\n    # Filter songs based on search query\n    if search_query:\n        # First search by song title\n        filtered_songs = [song for song in mp3_files if search_query.lower() in song.lower()]",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "display_voting_page",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def display_voting_page():\n    \"\"\"Display the voting page.\"\"\"\n    st.header(\"Vote for Your Favorite Song!\")\n    st.markdown(\"\"\"\n        To vote for your favorite song, please send your vote in pennies to Cash App: **$SolidBuildersInc**.\n        Then, enter the song name and the amount you sent below.\n    \"\"\")\n    # Ensure the queue is populated\n    if not st.session_state.queue:\n        st.warning(\"No songs available for voting. Please add songs to the queue.\")",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "display_results_page",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def display_results_page():\n    \"\"\"Display the voting results as a pie chart.\"\"\"\n    st.header(\"Vote Results\")\n    # Fetch votes from the database\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT song_name, SUM(vote) FROM votes GROUP BY song_name\")\n    results = cursor.fetchall()\n    conn.close()\n    if results:",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "display_about",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def display_about():\n    \"\"\"Display the about page.\"\"\"\n    st.header(\"About Gospel JukeBox\")\n    st.markdown(\"\"\"\n    ### Welcome to Gospel JukeBox!\n    This application allows you to listen to gospel music, view lyrics, and organize your listening experience.\n    #### Features:\n    - Browse and search the music library\n    - Queue management for continuous playback\n    - View song lyrics while listening",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):\n            if username and password:",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "logout",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def logout():\n    \"\"\"Log out the current user.\"\"\"\n    st.session_state.logged_in = False\n    st.session_state.username = None\n    st.session_state.is_admin = False\n    st.success(\"You have been logged out.\")\n    try:\n        st.rerun()\n    except AttributeError:\n        st.warning(\"Note deleted! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).\")",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def main():\n    # Display login status and logout button in sidebar if logged in\n    if st.session_state.logged_in:\n        with st.sidebar:\n            st.markdown(f\"**Logged in as: {st.session_state.username}**\")\n            if st.session_state.is_admin:\n                st.markdown(\"*Administrator*\")\n            if st.button(\"Logout\"):\n                logout()\n    # Initialize login_checkbox in session state if not present",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "AVAILABLE_INSTRUMENTS",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "AVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", \n    \"Piano\", \n    \"Drums\", \n    \"Trumpet\", \n    \"Saxophone\"\n]\n# --- Label Management Helper Functions ---\ndef get_labels_for_song_instrument(song_name, instrument):",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_URL",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "SUPABASE_URL = os.environ.get('SUPABASE_URL')\nSUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_KEY",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "SUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "USE_SUPABASE",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "USE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:\n        print(\"Supabase library not installed. Run: pip install supabase\")",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "defaults",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "defaults = {\n    'queue': [],\n    'history': [],\n    'current_song': None,\n    'current_lyrics': None,\n    'play_time': None,\n    'song_notes': {},\n    'audio_playing': False,\n    'audio_data': None,\n    'current_playback_time': 0,",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "class GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800\n        self.current_view = \"music\"  # Default view: music or pictures",
+        "peekOfCode": "def login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):\n        res = (supabase\n               .table(\"users\")\n               .select(\"username, password_hash, role\")\n               .eq(\"username\", user)\n               .execute())",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "load_content",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def load_content():\n    return sorted(f for f in os.listdir(MP3_DIR) if f.endswith('.mp3'))\n# --- Supabase helpers ---\ndef get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "get_labels_for_song_instrument",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())\n    return [(r[\"name\"], r[\"owner_id\"]) for r in res.data] if res.data else []\ndef fetch_notes(song_title):\n    res = (supabase",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_notes",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def fetch_notes(song_title):\n    res = (supabase\n           .table(\"notes\")\n           .select(\"owner_id, content, label\")\n           .eq(\"song_title\", song_title)\n           .order(\"owner_id\", {\"ascending\": True})\n           .execute())\n    return res.data if res.data else []\ndef add_note(song_title, owner_id, label, content):\n    payload = {",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "add_note",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def add_note(song_title, owner_id, label, content):\n    payload = {\n        \"song_title\": song_title,\n        \"owner_id\": owner_id,\n        \"label\": label,\n        \"content\": content,\n        \"created_at\": datetime.utcnow().isoformat()\n    }\n    supabase.table(\"notes\").insert(payload).execute()\n# --- Main page: Music Library ---",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "display_music_library",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def display_music_library():\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Search\n    search_query = st.text_input(\n        \"Search songs by title, sheet music label, or note label\")\n    if search_query:\n        by_title = [s for s in mp3_files if search_query.lower() in s.lower()]\n        lab = (supabase.table(\"labels\").select(\"song_title\")\n               .like(\"name\", f\"%{search_query}%\").execute().data or [])",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "display_about",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def display_about():\n    st.header(\"About\")\n    st.write(\"This is the Supabase-backed version of Gospel JukeBox.\")\n# --- App entry point ---\ndef main():\n    if 'logged_in' not in st.session_state:\n        st.session_state.logged_in = False\n        st.session_state.username = None\n        st.session_state.role = None\n    page = st.sidebar.radio(\"Page\", [\"Login\", \"Music Library\", \"About\"])",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
@@ -170,7 +755,25 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "def main(page: ft.Page):\n    app = GospelJukeBox(page)\nft.app(target=main)",
+        "peekOfCode": "def main():\n    if 'logged_in' not in st.session_state:\n        st.session_state.logged_in = False\n        st.session_state.username = None\n        st.session_state.role = None\n    page = st.sidebar.radio(\"Page\", [\"Login\", \"Music Library\", \"About\"])\n    if page == \"Login\":\n        login_page()\n    elif page == \"Music Library\":\n        display_music_library()",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_URL",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "SUPABASE_URL = os.getenv(\"SUPABASE_URL\")\nSUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Streamlit page config\nst.set_page_config(\n    page_title=\"Gospel JukeBox (Supabase)\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_KEY",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "SUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Streamlit page config\nst.set_page_config(\n    page_title=\"Gospel JukeBox (Supabase)\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)\n# Directories",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
@@ -179,7 +782,7 @@
         "kind": 5,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.getenv(\"MP3_DIR\", os.path.join(BASE_DIR, \"mp3_files\"))\nPICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
@@ -188,7 +791,7 @@
         "kind": 5,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:",
+        "peekOfCode": "MP3_DIR = os.getenv(\"MP3_DIR\", os.path.join(BASE_DIR, \"mp3_files\"))\nPICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
@@ -197,26 +800,17 @@
         "kind": 5,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\n# Ensure directories exist\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\n# Admin credentials (in a real app, these would be stored securely)\nADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):",
+        "peekOfCode": "PICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):\n        res = (supabase",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
     {
-        "label": "ADMIN_USERNAME",
-        "kind": 5,
-        "importPath": "Gospel_JukeBox",
-        "description": "Gospel_JukeBox",
-        "peekOfCode": "ADMIN_USERNAME = \"admin\"\n# Hashed password for \"admin123\"\nADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000",
-        "detail": "Gospel_JukeBox",
-        "documentation": {}
-    },
-    {
-        "label": "ADMIN_PASSWORD_HASH",
-        "kind": 5,
-        "importPath": "Gospel_JukeBox",
-        "description": "Gospel_JukeBox",
-        "peekOfCode": "ADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800",
-        "detail": "Gospel_JukeBox",
+        "label": "MusicPlayer",
+        "kind": 6,
+        "importPath": "Gospel_JukeBox_tkinter",
+        "description": "Gospel_JukeBox_tkinter",
+        "peekOfCode": "class MusicPlayer:\n    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Gospel JukeBox\")\n        self.root.geometry(\"800x600\")\n        self.root.configure(bg=\"#f0f0f0\")\n        # Initialize pygame mixer\n        pygame.mixer.init()\n        # Variables\n        self.current_song = \"\"",
+        "detail": "Gospel_JukeBox_tkinter",
         "documentation": {}
     },
     {
@@ -280,6 +874,366 @@
         "description": "main",
         "peekOfCode": "ADMIN_PASSWORD_HASH = bcrypt.hashpw(\"admin123\".encode(), bcrypt.gensalt())\nclass GospelJukeBox:\n    def __init__(self, page: ft.Page):\n        self.page = page\n        self.page.title = \"Gospel JukeBox\"\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        self.page.padding = 20\n        self.page.window_width = 1000\n        self.page.window_height = 800\n        self.page.window_height = 800",
         "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "init_db",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS votes (\n            song_name TEXT,\n            vote INTEGER\n        )\n    ''')",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "get_labels_for_song_instrument",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def get_labels_for_song_instrument(song_name, instrument):\n    \"\"\"Return a list of (label, creator_username) for a given song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?\", (song_name, instrument))\n    labels = [(row[0], row[1] if row[1] else 'Unknown') for row in cursor.fetchall() if row[0]]\n    conn.close()\n    return labels\ndef add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "add_label",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\n        \"INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)\",\n        (song_name, instrument, label, '', creator_username)\n    )\n    conn.commit()\n    conn.close()",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "delete_label",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def delete_label(song_name, instrument, label):\n    \"\"\"Delete a label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?\", (song_name, instrument, label))\n    conn.commit()\n    conn.close()\ndef get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "get_label_notes",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT username, notes, last_updated FROM song_notes WHERE song_name = ? AND label = ?\", (song_name, label))\n    notes = cursor.fetchall()\n    conn.close()\n    return notes\n# --- End Label Management Helpers ---\n# Initialize Supabase connection if environment variables are available",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "encode_audio_to_base64",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def encode_audio_to_base64(file_path):\n    \"\"\"Encode audio to base64.\"\"\"\n    with open(file_path, \"rb\") as audio_file:\n        return base64.b64encode(audio_file.read()).decode('utf-8')\ndef play_audio(file_path, song_name):\n    \"\"\"Play an audio file. Ensures play button is always responsive.\"\"\"\n    # Always reset audio state for new playback\n    st.session_state.audio_playing = False\n    st.session_state.current_song = None\n    st.session_state.audio_data = None",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "play_audio",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def play_audio(file_path, song_name):\n    \"\"\"Play an audio file. Ensures play button is always responsive.\"\"\"\n    # Always reset audio state for new playback\n    st.session_state.audio_playing = False\n    st.session_state.current_song = None\n    st.session_state.audio_data = None\n    # DO NOT reset or modify st.session_state.queue here!\n    # Now set new state\n    st.session_state.audio_data = encode_audio_to_base64(file_path)\n    st.session_state.audio_playing = True",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "load_content",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def load_content():\n    \"\"\"Load songs from directories.\"\"\"\n    return sorted(f for f in os.listdir(MP3_DIR) if f.endswith('.mp3'))\ndef load_lyrics(file_path):\n    \"\"\"Load lyrics from a corresponding text file.\"\"\"\n    text_file_path = os.path.splitext(file_path)[0] + '.txt'\n    return open(text_file_path).read() if os.path.exists(text_file_path) else \"No lyrics available.\"\ndef add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "load_lyrics",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def load_lyrics(file_path):\n    \"\"\"Load lyrics from a corresponding text file.\"\"\"\n    text_file_path = os.path.splitext(file_path)[0] + '.txt'\n    return open(text_file_path).read() if os.path.exists(text_file_path) else \"No lyrics available.\"\ndef add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness\n    if song_name not in st.session_state.queue:\n        st.session_state.queue.append(song_name)\n        st.session_state.queue_updated = True",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "add_to_queue",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def add_to_queue(song_name):\n    \"\"\"Add a song to the queue dynamically without full page refresh, preserving order and uniqueness.\"\"\"\n    # Only add if not already present to preserve order and uniqueness\n    if song_name not in st.session_state.queue:\n        st.session_state.queue.append(song_name)\n        st.session_state.queue_updated = True\n        st.session_state['autoplay_queue_empty_warned'] = False\n        try:\n            st.rerun()\n        except AttributeError:",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "play_from_queue",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def play_from_queue(index, remove_after_playing=True):\n    \"\"\"Play a song from the queue. Removes it unless told not to (for replay mode or Next Song button).\"\"\"\n    if 0 <= index < len(st.session_state.queue):\n        song_name = st.session_state.queue[index]\n        play_audio(os.path.join(MP3_DIR, song_name), song_name)\n        # If force_next_song_active is True, do NOT remove from queue (manual next song)\n        # If force_next_song_active is False (autoplay), DO remove from queue\n        if remove_after_playing:\n            if not st.session_state.get('force_next_song_active', False):\n                st.session_state.queue.pop(index)",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_mp3_player",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def display_mp3_player():\n    \"\"\"Display the MP3 player in the sidebar.\"\"\"\n    # Get current time\n    current_time = datetime.now()\n    # Check if song has ended on every Streamlit refresh\n    # This makes the autoplay more responsive than the 20-second interval\n    if st.session_state.audio_playing and st.session_state.current_song and st.session_state.song_start_timestamp:\n        # Calculate how long the song has been playing\n        song_play_duration = (current_time - st.session_state.song_start_timestamp).total_seconds()\n        # If song has been playing longer than the estimated duration, mark it as ended",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_music_library",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def display_music_library():\n    \"\"\"Display the music library page.\"\"\"\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Add search functionality\n    search_query = st.text_input(\"Search songs by title, sheet music label, or note label\", \"\")\n    # Filter songs based on search query\n    if search_query:\n        # First search by song title\n        filtered_songs = [song for song in mp3_files if search_query.lower() in song.lower()]",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_voting_page",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def display_voting_page():\n    \"\"\"Display the voting page.\"\"\"\n    st.header(\"Vote for Your Favorite Song!\")\n    st.markdown(\"\"\"\n        To vote for your favorite song, please send your vote in pennies to Cash App: **$SolidBuildersInc**.\n        Then, enter the song name and the amount you sent below.\n    \"\"\")\n    # Ensure the queue is populated\n    if not st.session_state.queue:\n        st.warning(\"No songs available for voting. Please add songs to the queue.\")",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_results_page",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def display_results_page():\n    \"\"\"Display the voting results as a pie chart.\"\"\"\n    st.header(\"Vote Results\")\n    # Fetch votes from the database\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT song_name, SUM(vote) FROM votes GROUP BY song_name\")\n    results = cursor.fetchall()\n    conn.close()\n    if results:",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_about",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def display_about():\n    \"\"\"Display the about page.\"\"\"\n    st.header(\"About Gospel JukeBox\")\n    st.markdown(\"\"\"\n    ### Welcome to Gospel JukeBox!\n    This application allows you to listen to gospel music, view lyrics, and organize your listening experience.\n    #### Features:\n    - Browse and search the music library\n    - Queue management for continuous playback\n    - View song lyrics while listening",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):\n            if username and password:",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "logout",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def logout():\n    \"\"\"Log out the current user.\"\"\"\n    st.session_state.logged_in = False\n    st.session_state.username = None\n    st.session_state.is_admin = False\n    st.success(\"You have been logged out.\")\n    try:\n        st.rerun()\n    except AttributeError:\n        st.warning(\"Note deleted! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).\")",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "def main():\n    # Display login status and logout button in sidebar if logged in\n    if st.session_state.logged_in:\n        with st.sidebar:\n            st.markdown(f\"**Logged in as: {st.session_state.username}**\")\n            if st.session_state.is_admin:\n                st.markdown(\"*Administrator*\")\n            if st.button(\"Logout\"):\n                logout()\n    # Initialize login_checkbox in session state if not present",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "AVAILABLE_INSTRUMENTS",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "AVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", \n    \"Piano\", \n    \"Drums\", \n    \"Trumpet\", \n    \"Saxophone\"\n]\n# --- Label Management Helper Functions ---\ndef get_labels_for_song_instrument(song_name, instrument):",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_URL",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "SUPABASE_URL = os.environ.get('SUPABASE_URL')\nSUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_KEY",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "SUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "USE_SUPABASE",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "USE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:\n        print(\"Supabase library not installed. Run: pip install supabase\")",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "defaults",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_db",
+        "description": "Streamlit_Gospel_JukeBox_db",
+        "peekOfCode": "defaults = {\n    'queue': [],\n    'history': [],\n    'current_song': None,\n    'current_lyrics': None,\n    'play_time': None,\n    'song_notes': {},\n    'audio_playing': False,\n    'audio_data': None,\n    'current_playback_time': 0,",
+        "detail": "Streamlit_Gospel_JukeBox_db",
+        "documentation": {}
+    },
+    {
+        "label": "login_page",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):\n        res = (supabase\n               .table(\"users\")\n               .select(\"username, password_hash, role\")\n               .eq(\"username\", user)\n               .execute())",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "load_content",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def load_content():\n    return sorted(f for f in os.listdir(MP3_DIR) if f.endswith('.mp3'))\n# --- Supabase helpers ---\ndef get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "get_labels_for_song_instrument",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())\n    return [(r[\"name\"], r[\"owner_id\"]) for r in res.data] if res.data else []\ndef fetch_notes(song_title):\n    res = (supabase",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_notes",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def fetch_notes(song_title):\n    res = (supabase\n           .table(\"notes\")\n           .select(\"owner_id, content, label\")\n           .eq(\"song_title\", song_title)\n           .order(\"owner_id\", {\"ascending\": True})\n           .execute())\n    return res.data if res.data else []\ndef add_note(song_title, owner_id, label, content):\n    payload = {",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "add_note",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def add_note(song_title, owner_id, label, content):\n    payload = {\n        \"song_title\": song_title,\n        \"owner_id\": owner_id,\n        \"label\": label,\n        \"content\": content,\n        \"created_at\": datetime.utcnow().isoformat()\n    }\n    supabase.table(\"notes\").insert(payload).execute()\n# --- Main page: Music Library ---",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_music_library",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def display_music_library():\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Search\n    search_query = st.text_input(\"Search songs by title, sheet music label, or note label\")\n    if search_query:\n        by_title = [s for s in mp3_files if search_query.lower() in s.lower()]\n        lab = (supabase.table(\"labels\").select(\"song_title\")\n               .like(\"name\", f\"%{search_query}%\").execute().data or [])\n        note = (supabase.table(\"notes\").select(\"song_title\")",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "display_about",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def display_about():\n    st.header(\"About\")\n    st.write(\"This is the Supabase-backed version of Gospel JukeBox.\")\n# --- App entry point ---\ndef main():\n    if 'logged_in' not in st.session_state:\n        st.session_state.logged_in = False\n        st.session_state.username = None\n        st.session_state.role = None\n    page = st.sidebar.radio(\"Page\", [\"Login\", \"Music Library\", \"About\"])",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def main():\n    if 'logged_in' not in st.session_state:\n        st.session_state.logged_in = False\n        st.session_state.username = None\n        st.session_state.role = None\n    page = st.sidebar.radio(\"Page\", [\"Login\", \"Music Library\", \"About\"])\n    if page == \"Login\":\n        login_page()\n    elif page == \"Music Library\":\n        display_music_library()",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_URL",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "SUPABASE_URL = os.getenv(\"SUPABASE_URL\")\nSUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Streamlit page config\nst.set_page_config(\n    page_title=\"Gospel JukeBox (Supabase)\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_KEY",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "SUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Streamlit page config\nst.set_page_config(\n    page_title=\"Gospel JukeBox (Supabase)\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)\n# Directories",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "BASE_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.getenv(\"MP3_DIR\", os.path.join(BASE_DIR, \"mp3_files\"))\nPICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "MP3_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "MP3_DIR = os.getenv(\"MP3_DIR\", os.path.join(BASE_DIR, \"mp3_files\"))\nPICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "PICTURES_DIR",
+        "kind": 5,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "PICTURES_DIR = os.getenv(\"PICTURES_DIR\", os.path.join(BASE_DIR, \"pictures\"))\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# --- Authentication ---\ndef login_page():\n    st.header(\"Login\")\n    user = st.text_input(\"Username\")\n    pwd = st.text_input(\"Password\", type=\"password\")\n    if st.button(\"Login\"):\n        res = (supabase",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
         "documentation": {}
     }
 ]

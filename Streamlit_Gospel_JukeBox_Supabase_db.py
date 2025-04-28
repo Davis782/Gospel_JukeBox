@@ -28,8 +28,6 @@ os.makedirs(MP3_DIR, exist_ok=True)
 os.makedirs(os.path.join(PICTURES_DIR, "sheet_music"), exist_ok=True)
 
 # --- Authentication ---
-
-
 def login_page():
     st.header("Login")
     user = st.text_input("Username")
@@ -50,14 +48,10 @@ def login_page():
             st.error("Invalid credentials")
 
 # --- Content loader ---
-
-
 def load_content():
     return sorted(f for f in os.listdir(MP3_DIR) if f.endswith('.mp3'))
 
 # --- Supabase helpers ---
-
-
 def get_labels_for_song_instrument(song_title, instrument):
     res = (supabase
            .table("labels")
@@ -89,15 +83,12 @@ def add_note(song_title, owner_id, label, content):
     supabase.table("notes").insert(payload).execute()
 
 # --- Main page: Music Library ---
-
-
 def display_music_library():
     st.header("Music Library")
     mp3_files = load_content()
 
     # Search
-    search_query = st.text_input(
-        "Search songs by title, sheet music label, or note label")
+    search_query = st.text_input("Search songs by title, sheet music label, or note label")
     if search_query:
         by_title = [s for s in mp3_files if search_query.lower() in s.lower()]
         lab = (supabase.table("labels").select("song_title")
@@ -122,8 +113,7 @@ def display_music_library():
     notes = fetch_notes(selected_song)
     if notes:
         unique_labels = sorted({n["label"] for n in notes if n.get("label")})
-        mode = st.radio("Existing Notes View", [
-                        "All notes", "Labels only", "Filter by label"], index=0)
+        mode = st.radio("Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0)
         if mode == "Labels only":
             if unique_labels:
                 for lbl in unique_labels:
@@ -132,15 +122,13 @@ def display_music_library():
                 st.info("No labels to display.")
         else:
             if mode == "Filter by label" and unique_labels:
-                sel = st.selectbox(
-                    "Select label to filter notes", unique_labels)
+                sel = st.selectbox("Select label to filter notes", unique_labels)
                 filtered = [n for n in notes if n.get("label") == sel]
             else:
                 filtered = notes
             for n in filtered:
                 lbl = n.get("label", "[No Label]")
-                st.text_area(f"Note by {n['owner_id']} ({lbl})", n.get(
-                    "content", ""), height=100, disabled=True)
+                st.text_area(f"Note by {n['owner_id']} ({lbl})", n.get("content", ""), height=100, disabled=True)
     else:
         st.info("No notes found for this song yet.")
 
@@ -153,20 +141,15 @@ def display_music_library():
             new_content = st.text_area("Note Content", height=100)
             submitted = st.form_submit_button("Add Note")
             if submitted and new_content.strip():
-                add_note(selected_song, st.session_state.username,
-                         new_lbl, new_content)
+                add_note(selected_song, st.session_state.username, new_lbl, new_content)
                 st.experimental_rerun()
 
 # --- About Page ---
-
-
 def display_about():
     st.header("About")
     st.write("This is the Supabase-backed version of Gospel JukeBox.")
 
 # --- App entry point ---
-
-
 def main():
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
@@ -180,7 +163,6 @@ def main():
         display_music_library()
     else:
         display_about()
-
 
 if __name__ == "__main__":
     main()
