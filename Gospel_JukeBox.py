@@ -7,7 +7,7 @@ import base64
 import webbrowser
 
 # Load environment variables and initialize Supabase client
-load_dotenv(.env)
+load_dotenv(".env")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
