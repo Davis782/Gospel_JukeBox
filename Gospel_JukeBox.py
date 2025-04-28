@@ -49,6 +49,18 @@ def init_db():
         )
     ''')
     
+    # Create song notes table to store user/admin notes
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS song_notes (
+            song_name TEXT,
+            username TEXT,
+            label TEXT,
+            notes TEXT,
+            last_updated TEXT,
+            PRIMARY KEY (song_name, username, label)
+        )
+    ''')
+    
     # Create users table for authentication
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
