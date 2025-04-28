@@ -38,11 +38,13 @@ def init_db():
     # Create instrument sheet music table
     cursor.execute('''
         -- Updated schema: added 'label' column for multi-type sheet music support (2025-04-21)
+        -- Updated schema: added 'creator_username' column for permission management (2025-04-22)
         CREATE TABLE IF NOT EXISTS instrument_sheet_music (
             song_name TEXT,
             instrument TEXT,
             label TEXT,
             file_path TEXT,
+            creator_username TEXT,
             PRIMARY KEY (song_name, instrument, label)
         )
     ''')
@@ -56,27 +58,25 @@ def init_db():
         )
     ''')
     
-    # Create song_notes table if it doesn't exist
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS song_notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            song_name TEXT NOT NULL,
-            username TEXT,
-            label TEXT,
-            notes TEXT,
-            last_updated TIMESTAMP
-        )
-    ''')
+    # --- MIGRATION: Add 'is_admin' column if missing for legacy DBs ---
+    cursor.execute("PRAGMA table_info(users)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'is_admin' not in columns:
+        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
     
     # Add default admin user if not exists
     cursor.execute("SELECT * FROM users WHERE username = 'admin'")
     if not cursor.fetchone():
         # Simple password storage for demo purposes
         # In production, use password hashing
-        cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", 
-                      ('admin', 'admin123', 1))
+        cursor.execute("PRAGMA table_info(users)")
+        cols = [col[1] for col in cursor.fetchall()]
+        if 'role' in cols:
+            cursor.execute("INSERT INTO users (username, password, is_admin, role) VALUES (?, ?, ?, ?)", ('admin', 'admin123', 1, 'admin'))
+        else:
+            cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", ('admin', 'admin123', 1))
     
-    # --- MIGRATION: Add 'label' column if missing (for legacy DBs) ---
+    # --- MIGRATION: Add 'label' and 'creator_username' columns if missing (for legacy DBs) ---
     try:
         cursor.execute("PRAGMA table_info(instrument_sheet_music)")
         columns = [row[1] for row in cursor.fetchall()]
@@ -84,6 +84,8 @@ def init_db():
             cursor.execute("ALTER TABLE instrument_sheet_music ADD COLUMN label TEXT DEFAULT ''")
             # Rebuild primary key if needed (requires manual intervention if not empty)
             # For now, just add the column for compatibility.
+        if 'creator_username' not in columns:
+            cursor.execute("ALTER TABLE instrument_sheet_music ADD COLUMN creator_username TEXT DEFAULT ''")
     except Exception as e:
         print(f"Migration warning: {e}")
     conn.commit()
@@ -102,6 +104,64 @@ AVAILABLE_INSTRUMENTS = [
     "Saxophone"
 ]
 
+# --- Label Management Helper Functions ---
+def get_labels_for_song_instrument(song_name, instrument):
+    """Return a list of (label, creator_username) for a given song/instrument."""
+    conn = sqlite3.connect('Gospel_Jukebox.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?", (song_name, instrument))
+    labels = [(row[0], row[1] if row[1] else 'Unknown') for row in cursor.fetchall() if row[0]]
+    conn.close()
+    return labels
+
+def add_label(song_name, instrument, label, creator_username):
+    """Add a new label for a song/instrument."""
+    conn = sqlite3.connect('Gospel_Jukebox.db')
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
+        (song_name, instrument, label, '', creator_username)
+    )
+    conn.commit()
+    conn.close()
+
+def delete_label(song_name, instrument, label):
+    """Delete a label for a song/instrument."""
+    conn = sqlite3.connect('Gospel_Jukebox.db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?", (song_name, instrument, label))
+    conn.commit()
+    conn.close()
+
+def get_label_notes(song_name, instrument, label):
+    """Return all notes for a song/instrument/label as a list of (username, notes, last_updated)."""
+    conn = sqlite3.connect('Gospel_Jukebox.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT username, notes, last_updated FROM song_notes WHERE song_name = ? AND label = ?", (song_name, label))
+    notes = cursor.fetchall()
+    conn.close()
+    return notes
+# --- End Label Management Helpers ---
+
+# Initialize Supabase connection if environment variables are available
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
+USE_SUPABASE = SUPABASE_URL and SUPABASE_KEY
+
+# If using Supabase, import the library
+if USE_SUPABASE:
+    try:
+        import supabase
+        from supabase import create_client, Client
+        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("Supabase client initialized successfully")
+    except ImportError:
+        print("Supabase library not installed. Run: pip install supabase")
+        USE_SUPABASE = False
+    except Exception as e:
+        print(f"Error initializing Supabase client: {e}")
+        USE_SUPABASE = False
+
 # Initialize session state
 defaults = {
     'queue': [],
@@ -119,6 +179,7 @@ defaults = {
     'view_notes': True,  # Toggle between Notes and Sheet Music
     'queue_updated': False,  # Flag for UI refresh
     'selected_instrument': AVAILABLE_INSTRUMENTS[0],  # Default to first instrument
+    'selected_label': None,  # Currently selected sheet music label
     'last_check_time': datetime.now(),  # For the 20-second timer loop
     'check_interval': 10,  # Check interval in seconds (reduced for more responsive autoplay)
     'song_start_timestamp': None,  # Full timestamp when song started
@@ -126,7 +187,8 @@ defaults = {
     'force_next_song': False,  # Flag to force playing the next song
     'logged_in': False,  # User login status
     'username': None,  # Current logged in username
-    'is_admin': False  # Admin privileges flag
+    'is_admin': False,  # Admin privileges flag
+    'use_supabase': USE_SUPABASE  # Flag to indicate if Supabase is being used
 }
 
 for key, value in defaults.items():
@@ -531,7 +593,7 @@ def display_music_library():
     mp3_files = load_content()
 
     # Add search functionality
-    search_query = st.text_input("Search songs by title or label", "")
+    search_query = st.text_input("Search songs by title, sheet music label, or note label", "")
     
     # Filter songs based on search query
     if search_query:
@@ -548,12 +610,24 @@ def display_music_library():
         label_matches = [f"{row[0]}" for row in cursor.fetchall() if f"{row[0]}" in mp3_files]
         conn.close()
         
+        # Also search by note labels in song_notes
+        conn = sqlite3.connect('Gospel_Jukebox.db')
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT DISTINCT song_name FROM song_notes WHERE label LIKE ?", (f'%{search_query}%',)
+        )
+        note_matches = [row[0] for row in cursor.fetchall() if row[0] in mp3_files]
+        conn.close()
+        
         # Combine results from both searches and remove duplicates
-        filtered_songs = list(set(filtered_songs + label_matches))
+        filtered_songs = list(set(filtered_songs + label_matches + note_matches))
         
         # Display which songs were found by label if any were found this way
         if label_matches and not any(search_query.lower() in song.lower() for song in label_matches):
             st.info(f"Found {len(label_matches)} song(s) with label matching '{search_query}' click dropdown below to view")
+        # Inform user about note label matches
+        if note_matches and not any(search_query.lower() in song.lower() for song in note_matches):
+            st.info(f"Found {len(note_matches)} song(s) with note label matching '{search_query}', click dropdown to view")
     else:
         filtered_songs = mp3_files
     
@@ -681,6 +755,7 @@ def display_music_library():
 
     show_lyrics_state = st.session_state.get('song_btn_state') in ['show_lyrics', 'play_song']
     if st.session_state.current_song or show_lyrics_state:
+        st.session_state.current_song = selected_song  # ensure current song is set for DB queries
         st.subheader(f" {selected_song.replace('.mp3', '')}")
         if st.session_state.audio_playing and st.session_state.current_song:
             st.write(f"Started playing at: {st.session_state.play_time}")
@@ -701,203 +776,221 @@ def display_music_library():
         with col2:
             if st.session_state.view_notes:
                 st.markdown("### Notes")
-                # --- Notes Dropdown for All Users ---
+                current_song_name = st.session_state.current_song
+                is_logged_in = st.session_state.get('logged_in', False)
+                current_username = st.session_state.get('username', None)
+                is_admin = st.session_state.get('is_admin', False)
+
+                # --- Display All Existing Notes --- 
                 conn = sqlite3.connect('Gospel_Jukebox.db')
                 cursor = conn.cursor()
-                cursor.execute("SELECT username, label FROM song_notes WHERE song_name = ?", (st.session_state.current_song,))
-                note_pairs = [(row[0], row[1]) for row in cursor.fetchall() if row[0] and row[1] is not None]
+                # Fetch username, label, and notes content
+                cursor.execute("SELECT username, label, notes FROM song_notes WHERE song_name = ? ORDER BY username, label", (current_song_name,))
+                all_notes = cursor.fetchall()
                 conn.close()
-                if note_pairs:
-                    # Format as "user:label" for dropdown, show '[No Label]' if label is empty
-                    pair_options = [f"{user}:{label if label else '[No Label]'}" for user, label in note_pairs]
-                    # Use session state to remember selected pair
-                    if 'selected_note_pair' not in st.session_state or st.session_state.selected_note_pair not in pair_options:
-                        st.session_state.selected_note_pair = pair_options[0]
-                    selected_pair = st.selectbox("Select User & Label", pair_options, index=pair_options.index(st.session_state.selected_note_pair), key="notes_pair_select")
-                    st.session_state.selected_note_pair = selected_pair
-                    sel_user, sel_label = selected_pair.split(":", 1)
-                    sel_label = sel_label.strip()
-                    if sel_label == '[No Label]':
-                        sel_label = ''
-                    # Fetch note for selected pair
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT notes FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", (st.session_state.current_song, sel_user, sel_label))
-                    row = cursor.fetchone()
-                    note_val = row[0] if row else ""
-                    conn.close()
-                    # Show text area (editable only if owner)
-                    if st.session_state.get('logged_in', False) and st.session_state.get('username', None) == sel_user:
-                        notes_input = st.text_area("Song Notes", value=note_val, height=150, key=f"notes_input_area_{sel_user}_{sel_label}")
-                        save_notes_btn = st.button("Save Notes", key=f"save_notes_btn_{sel_user}_{sel_label}")
-                        if save_notes_btn:
-                            if not sel_user or not sel_label or not notes_input.strip():
-                                st.warning("Username, label, and notes must all be provided and non-empty to save.")
+
+                if all_notes:
+                    # Prepare filtered notes by label
+                    unique_labels = sorted({lbl for _, lbl, _ in all_notes if lbl})
+                    note_view_mode = st.radio(
+                        "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
+                    )
+                    if note_view_mode == "Labels only":
+                        st.markdown("**Note Labels:**")
+                        if unique_labels:
+                            for lbl in unique_labels:
+                                st.write(f"- {lbl}")
+                        else:
+                            st.info("No labels to display.")
+                    else:
+                        # Determine which notes to show
+                        if note_view_mode == "Filter by label" and unique_labels:
+                            selected_note_label = st.selectbox(
+                                "Select label to filter notes", unique_labels, key="note_label_filter_select"
+                            )
+                            filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
+                        else:
+                            filtered_notes = all_notes
+
+                        st.markdown("**Existing Notes:**")
+                        notes_container = st.container()  # Use a container for better layout control
+                        with notes_container:
+                            for user, label, note_content in filtered_notes:
+                                display_label = label if label else '[No Label]'
+                                # Display each note in a read-only text area within the container
+                                st.text_area(
+                                    f"Note by {user} ({display_label})", 
+                                    value=note_content if note_content else "", 
+                                    height=100, 
+                                    key=f"note_display_{user}_{label}", 
+                                    disabled=True # Make it read-only for now
+                                )
+                                st.markdown("--- *end of note* ---") # Separator
+                else:
+                    st.info("No notes found for this song yet.")
+
+                # --- Add New Note Section (Logged-in Users Only) ---
+
+                # --- Add New Note Section (Logged-in Users Only) ---
+                if is_logged_in:
+                    st.markdown("---")
+                    st.markdown("#### Add Your Note")
+                    with st.form(key='add_note_form'):
+                        new_note_label = st.text_input("Note Label (e.g., 'Verse 1 Chords', 'Performance Idea')", key="new_note_label")
+                        new_note_content = st.text_area("Note Content", height=100, key="new_note_content")
+                        submit_new_note = st.form_submit_button("Save New Note")
+
+                        if submit_new_note:
+                            if not new_note_label.strip() or not new_note_content.strip():
+                                st.warning("Both Label and Content are required to save a new note.")
                             else:
                                 conn = sqlite3.connect('Gospel_Jukebox.db')
                                 cursor = conn.cursor()
-                                cursor.execute("UPDATE song_notes SET notes = ?, last_updated = ? WHERE song_name = ? AND username = ? AND label = ?",
-                                    (notes_input, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), st.session_state.current_song, sel_user, sel_label)
-                                )
-                                conn.commit()
+                                # Check if a note with the same user and label already exists for this song
+                                cursor.execute("SELECT 1 FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", 
+                                               (current_song_name, current_username, new_note_label))
+                                exists = cursor.fetchone()
+                                if exists:
+                                    st.error(f"You already have a note with the label '{new_note_label}' for this song. Please choose a different label or edit the existing one.")
+                                else:
+                                    cursor.execute("INSERT INTO song_notes (song_name, username, label, notes, last_updated) VALUES (?, ?, ?, ?, ?)",
+                                        (current_song_name, current_username, new_note_label, new_note_content, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                                    )
+                                    conn.commit()
+                                    st.success(f"New note with label '{new_note_label}' saved!")
+                                    # Clear form fields after successful submission is tricky with st.form, 
+                                    # usually requires rerun or session state management.
+                                    # For simplicity, we just show success and let rerun handle refresh.
+                                    try: st.rerun() # Refresh to show the new note in the dropdown
+                                    except: pass 
                                 conn.close()
-                                st.success("Notes updated!")
-                    else:
-                        st.text_area("Song Notes", value=note_val, height=150, key=f"notes_input_area_{sel_user}_{sel_label}", disabled=True)
-                        if not st.session_state.get('logged_in', False):
-                            st.info("Log in to add or edit your own notes.")
-                else:
-                    st.info("No notes saved for this song yet.")
-                # --- Notes Management Section (admins) ---
-                if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
+                elif not all_notes: # Only show if not logged in AND no notes exist
+                     st.info("Log in to add notes for this song.")
+
+                # --- Notes Management Section (Admins Only) ---
+                if is_admin:
                     st.markdown("---")
-                    st.markdown("#### Notes for this Song (Admin Management)")
+                    st.markdown("#### All Notes for this Song (Admin Management)")
                     conn = sqlite3.connect('Gospel_Jukebox.db')
                     cursor = conn.cursor()
-                    cursor.execute("SELECT username, label, notes, last_updated FROM song_notes WHERE song_name = ?", (st.session_state.current_song,))
+                    cursor.execute("SELECT username, label, notes, last_updated FROM song_notes WHERE song_name = ?", (current_song_name,))
                     note_entries = cursor.fetchall()
                     conn.close()
                     if note_entries:
                         for note_user, note_label, note_text, note_time in note_entries:
-                            col_n1, col_n2, col_n3, col_n4 = st.columns([2,2,6,2])
+                            # Use unique keys for delete buttons within the loop
+                            delete_key = f"delete_note_{note_user}_{note_label}_{current_song_name}"
+                            col_n1, col_n2, col_n3, col_n4 = st.columns([2, 2, 6, 2])
                             with col_n1:
                                 st.write(f"User: {note_user}")
                             with col_n2:
-                                st.write(f"Label: {note_label}")
+                                st.write(f"Label: {note_label if note_label else '[No Label]'}")
                             with col_n3:
                                 st.write(f"{note_text}")
                             with col_n4:
-                                if st.button(f"Delete Note", key=f"delete_note_{note_user}_{note_label}"):
+                                if st.button(f"Delete", key=delete_key):
                                     conn = sqlite3.connect('Gospel_Jukebox.db')
                                     cursor = conn.cursor()
-                                    cursor.execute("DELETE FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", (st.session_state.current_song, note_user, note_label))
+                                    cursor.execute("DELETE FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", (current_song_name, note_user, note_label))
                                     conn.commit()
                                     conn.close()
                                     st.success(f"Note for user '{note_user}', label '{note_label}' deleted!")
-                                    try:
-                                        st.experimental_rerun()
+                                    try: 
+                                        st.rerun() # Refresh the page to reflect deletion
                                     except AttributeError:
-                                        st.warning("Note deleted! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
+                                        st.warning("Note deleted! Please manually refresh the page to see the update (st.rerun() is not available).")
+                                    except Exception as e:
+                                        st.error(f"Error deleting note: {e}")
                     else:
-                        st.info("No notes saved for this song yet.")
-
+                        st.info("No notes found for admin management.")
             else:
                 # Sheet Music Display with Instrument Selection
                 st.markdown("### Sheet Music")
                 
-                # Instrument selection dropdown
-                selected_instrument = st.selectbox(
-                    "Select Instrument", 
-                    AVAILABLE_INSTRUMENTS,
-                    index=AVAILABLE_INSTRUMENTS.index(st.session_state.selected_instrument)
-                )
-                
+                # Instrument and label selection dropdowns side by side
+                col1, col2 = st.columns(2)
+                with col1:
+                    selected_instrument = st.selectbox(
+                        "Select Instrument", 
+                        AVAILABLE_INSTRUMENTS,
+                        index=AVAILABLE_INSTRUMENTS.index(st.session_state.selected_instrument)
+                    )
+                with col2:
+                    # Fetch sheet music entries with creator information
+                    conn = sqlite3.connect('Gospel_Jukebox.db')
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?",
+                        (st.session_state.current_song, st.session_state.selected_instrument)
+                    )
+                    sheet_music_entries = cursor.fetchall()
+                    conn.close()
+                    
+                    # Initialize unique_labels and label_to_creator
+                    unique_labels = []
+                    label_to_creator = {}
+                    
+                    for label, creator in sheet_music_entries:
+                        if label and label.strip() and label not in unique_labels:
+                            unique_labels.append(label)
+                            label_to_creator[label] = creator if creator else 'Unknown'
+                    
+                    # Use session state to remember selected label
+                    if st.session_state.selected_label is None or st.session_state.selected_label not in unique_labels:
+                        st.session_state.selected_label = unique_labels[0] if unique_labels else None
+                    
+                    # Display the label selector
+                    selected_label = st.selectbox(
+                        "Select Sheet Music Type", 
+                        unique_labels, 
+                        index=unique_labels.index(st.session_state.selected_label) if st.session_state.selected_label in unique_labels else 0,
+                        key="sheet_music_label_select"
+                    )
+                    st.session_state.selected_label = selected_label
+                    
+                    # Display label creator information
+                    if selected_label:
+                        st.write(f"Created by: {label_to_creator[selected_label]}")
+                    
                 # Update session state with selected instrument
                 if selected_instrument != st.session_state.selected_instrument:
                     st.session_state.selected_instrument = selected_instrument
+                    st.session_state.selected_label = None  # Reset label when instrument changes
                     try:
                         st.rerun()  # Refresh to apply the instrument change
                     except AttributeError:
                         st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                 
-                # Construct the sheet music path with instrument suffix
-                conn = sqlite3.connect('Gospel_Jukebox.db')
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT label, file_path FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?",
-                    (st.session_state.current_song, st.session_state.selected_instrument)
-                )
-                sheet_music_entries = cursor.fetchall()
-                conn.close()
-                # Only show unique, non-empty, non-null labels in the dropdown
-                unique_labels = []
-                label_to_path = {}
-                for label, path in sheet_music_entries:
-                    if label and label.strip() and label not in unique_labels:
-                        unique_labels.append(label)
-                        label_to_path[label] = path
-
-                if unique_labels:
-                    selected_label = st.selectbox("Select Sheet Music Type", unique_labels, key="sheet_music_label_select")
-                    file_path = label_to_path[selected_label]
+                # Display sheet music if available
+                if selected_label:
+                    conn = sqlite3.connect('Gospel_Jukebox.db')
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "SELECT file_path FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
+                        (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
+                    )
+                    file_path = cursor.fetchone()[0] if cursor.fetchone() else None
+                    conn.close()
+                    
                     if file_path and os.path.exists(file_path):
                         st.image(file_path, caption=f"{st.session_state.selected_instrument} - {selected_label}", use_column_width=True)
-                        # Admin: Remove sheet music file for this label
-                        if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
-                            if st.button(f"🗑️ Remove '{selected_label}' Sheet Music", key=f"remove_sheet_{selected_label}"):
-                                conn = sqlite3.connect('Gospel_Jukebox.db')
-                                cursor = conn.cursor()
-                                cursor.execute(
-                                    "UPDATE instrument_sheet_music SET file_path = '' WHERE song_name = ? AND instrument = ? AND label = ?",
-                                    (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
-                                )
-                                conn.commit()
-                                conn.close()
-                                if os.path.exists(file_path):
-                                    try:
-                                        os.remove(file_path)
-                                    except Exception:
-                                        pass
-                                st.success(f"Sheet music file for '{selected_label}' removed!")
-                                try:
-                                    st.experimental_rerun()
-                                except AttributeError:
-                                    st.warning("Sheet music removed! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
                     else:
                         st.info(f"No sheet music file uploaded for '{selected_label}'.")
-                        # Show upload UI for this label if admin
-                        if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
-                            uploaded_file = st.file_uploader(
-                                f"Upload sheet music for '{selected_label}' (JPG, PNG, PDF)",
-                                type=["jpg", "png", "pdf"],
-                                key=f"upload_{st.session_state.selected_instrument}_{selected_label}"
-                            )
-                            upload_btn = st.button(f"Upload Sheet Music for '{selected_label}'", key=f"upload_btn_{selected_label}")
-                            if upload_btn:
-                                if uploaded_file is not None:
-                                    ext = uploaded_file.name.split('.')[-1]
-                                    save_path = os.path.join(
-                                        os.path.join(PICTURES_DIR, "sheet_music"),
-                                        f"{os.path.splitext(st.session_state.current_song)[0]}_{st.session_state.selected_instrument}_{selected_label.replace(' ', '_')}.{ext}"
-                                    )
-                                    with open(save_path, "wb") as f:
-                                        f.write(uploaded_file.getbuffer())
-                                    # Update the database for this label
-                                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                                    cursor = conn.cursor()
-                                    cursor.execute(
-                                        "UPDATE instrument_sheet_music SET file_path = ? WHERE song_name = ? AND instrument = ? AND label = ?",
-                                        (save_path, st.session_state.current_song, st.session_state.selected_instrument, selected_label)
-                                    )
-                                    conn.commit()
-                                    conn.close()
-                                    st.success(f"Sheet music for '{selected_label}' uploaded and saved to database!")
-                                    try:
-                                        st.experimental_rerun()
-                                    except AttributeError:
-                                        st.warning("Sheet music uploaded! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
-                                else:
-                                    st.warning("Please select a file to upload.")
-
-                # Admin controls for deleting sheet music labels
+                
+                # Admin controls for label management
                 if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
                     st.markdown("---")
-                    st.subheader("Admin: Manage Sheet Music Labels")
-                    for label in unique_labels:
-                        col_del1, col_del2 = st.columns([4,1])
-                        with col_del1:
-                            st.write(f"Label: {label}")
-                        with col_del2:
-                            if st.button(f"Delete Label", key=f"delete_label_{label}"):
-                                conn = sqlite3.connect('Gospel_Jukebox.db')
-                                cursor = conn.cursor()
-                                cursor.execute(
-                                    "DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
-                                    (st.session_state.current_song, st.session_state.selected_instrument, label)
-                                )
-                                conn.commit()
-                                conn.close()
-                                st.success(f"Label '{label}' deleted!")
+                    st.subheader("Manage Sheet Music Labels")
+                    
+                    # Add new sheet music type/label
+                    new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
+                    if st.button("Add Type", key="add_sheet_music_label_btn"):
+                        if new_label.strip():
+                            # Prevent duplicate label for this song/instrument
+                            if new_label.strip() in unique_labels:
+                                st.warning(f"Label '{new_label.strip()}' already exists for this song/instrument. Please use a unique label.")
+                            else:
+                                st.write("(No permission)")
 
             # --- Notes Management Section (admins) ---
             if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
@@ -907,47 +1000,91 @@ def display_music_library():
                 new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
                 if st.button("Add Type", key="add_sheet_music_label_btn"):
                     if new_label.strip():
+                        # Make sure unique_labels is defined in this code path
+                        if 'unique_labels' not in locals():
+                            # Fetch labels if not already done
+                            conn = sqlite3.connect('Gospel_Jukebox.db')
+                            cursor = conn.cursor()
+                            cursor.execute(
+                                "SELECT label FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?",
+                                (st.session_state.current_song, st.session_state.selected_instrument)
+                            )
+                            unique_labels = [row[0] for row in cursor.fetchall() if row[0]]
+                            conn.close()
+                        
                         # Prevent duplicate label for this song/instrument
                         if new_label.strip() in unique_labels:
                             st.warning(f"Label '{new_label.strip()}' already exists for this song/instrument.")
                         else:
-                            conn = sqlite3.connect('Gospel_Jukebox.db')
-                            cursor = conn.cursor()
-                            cursor.execute(
-                                "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path) VALUES (?, ?, ?, ?)",
-                                (st.session_state.current_song, st.session_state.selected_instrument, new_label.strip(), "")
-                            )
-                            conn.commit()
-                            conn.close()
-                            st.success(f"Sheet music type '{new_label.strip()}' added!")
-                            # Try to rerun, otherwise notify and ask user to refresh manually
-                            try:
-                                st.experimental_rerun()
-                            except AttributeError:
-                                st.warning("Sheet music type added! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
+                            # Get current username for creator attribution
+                            creator = st.session_state.get('username', '')
+                            
+                            if st.session_state.get('use_supabase', False):
+                                try:
+                                    # Insert into Supabase
+                                    data = {
+                                        'song_name': st.session_state.current_song,
+                                        'instrument': st.session_state.selected_instrument,
+                                        'label': new_label.strip(),
+                                        'file_path': "",
+                                        'creator_username': creator
+                                    }
+                                    supabase_client.table('instrument_sheet_music').insert(data).execute()
+                                    st.success(f"Sheet music type '{new_label.strip()}' added to Supabase!")
+                                except Exception as e:
+                                    st.error(f"Supabase error: {e}")
+                                    # Fall back to SQLite if Supabase fails
+                                    st.warning("Falling back to local database...")
+                                    conn = sqlite3.connect('Gospel_Jukebox.db')
+                                    cursor = conn.cursor()
+                                    cursor.execute(
+                                        "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
+                                        (st.session_state.current_song, st.session_state.selected_instrument, new_label.strip(), "", creator)
+                                    )
+                                    conn.commit()
+                                    conn.close()
                             else:
-                                st.warning("Please enter a label name.")
-                        # Remove selected sheet music
-                        if st.button(f"🗑️ Remove '{selected_label}' Sheet Music"):
-                            conn = sqlite3.connect('Gospel_Jukebox.db')
-                            cursor = conn.cursor()
-                            cursor.execute(
-                                "DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
-                                (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
-                            )
-                            conn.commit()
-                            conn.close()
-                            # Delete file from disk
-                            try:
-                                os.remove(label_to_path[selected_label])
-                                st.success(f"Sheet music '{selected_label}' removed!")
-                            except Exception as e:
-                                st.warning(f"File delete error: {e}")
+                                # Use SQLite
+                                conn = sqlite3.connect('Gospel_Jukebox.db')
+                                cursor = conn.cursor()
+                                cursor.execute(
+                                    "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
+                                    (st.session_state.current_song, st.session_state.selected_instrument, new_label.strip(), "", creator)
+                                )
+                                conn.commit()
+                                conn.close()
+                                st.success(f"Sheet music type '{new_label.strip()}' added!")
+                            
                             # Try to rerun, otherwise notify and ask user to refresh manually
                             try:
-                                st.experimental_rerun()
+                                st.rerun()
                             except AttributeError:
-                                st.warning("Sheet music removed! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
+                                st.warning("Sheet music type added! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
+                    else:
+                        st.warning("Please enter a label name.")
+                
+                # Remove selected sheet music - moved outside the Add Type button logic
+                if 'selected_label' in locals() and st.button(f"🗑️ Remove '{selected_label}' Sheet Music", key="remove_sheet_music_btn"):
+                    conn = sqlite3.connect('Gospel_Jukebox.db')
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
+                        (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
+                    )
+                    conn.commit()
+                    conn.close()
+                    # Delete file from disk
+                    if 'label_to_path' in locals() and selected_label in label_to_path:
+                        try:
+                            os.remove(label_to_path[selected_label])
+                            st.success(f"Sheet music '{selected_label}' removed!")
+                        except Exception as e:
+                            st.warning(f"File delete error: {e}")
+                    # Try to rerun, otherwise notify and ask user to refresh manually
+                    try:
+                        st.experimental_rerun()
+                    except AttributeError:
+                        st.warning("Sheet music removed! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
                     else:
                         st.info("Log in to manage sheet music.")
                         if st.button("Go to Login", key="login_from_sheet_music"):
@@ -989,21 +1126,50 @@ def display_music_library():
                                     )
                                     with open(save_path, "wb") as f:
                                         f.write(uploaded_file.getbuffer())
-                                    # Store the reference in the database with the label
-                                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                                    cursor = conn.cursor()
-                                    cursor.execute(
-                                        "INSERT OR REPLACE INTO instrument_sheet_music (song_name, instrument, label, file_path) VALUES (?, ?, ?, ?)",
-                                        (st.session_state.current_song, st.session_state.selected_instrument, label_input.strip(), save_path)
-                                    )
-                                    conn.commit()
-                                    conn.close()
-                                    st.success("Sheet music uploaded and saved to database!")
+                                    # Get current username for creator attribution
+                                    creator = st.session_state.get('username', '')
+                                    
+                                    if st.session_state.get('use_supabase', False):
+                                        try:
+                                            # Store in Supabase
+                                            data = {
+                                                'song_name': st.session_state.current_song,
+                                                'instrument': st.session_state.selected_instrument,
+                                                'label': label_input.strip(),
+                                                'file_path': save_path,
+                                                'creator_username': creator
+                                            }
+                                            supabase_client.table('instrument_sheet_music').upsert(data).execute()
+                                            st.success("Sheet music uploaded and saved to Supabase!")
+                                        except Exception as e:
+                                            st.error(f"Supabase error: {e}")
+                                            # Fall back to SQLite
+                                            conn = sqlite3.connect('Gospel_Jukebox.db')
+                                            cursor = conn.cursor()
+                                            cursor.execute(
+                                                "INSERT OR REPLACE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
+                                                (st.session_state.current_song, st.session_state.selected_instrument, label_input.strip(), save_path, creator)
+                                            )
+                                            conn.commit()
+                                            conn.close()
+                                            st.success("Sheet music uploaded and saved to local database!")
+                                    else:
+                                        # Use SQLite
+                                        conn = sqlite3.connect('Gospel_Jukebox.db')
+                                        cursor = conn.cursor()
+                                        cursor.execute(
+                                            "INSERT OR REPLACE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
+                                            (st.session_state.current_song, st.session_state.selected_instrument, label_input.strip(), save_path, creator)
+                                        )
+                                        conn.commit()
+                                        conn.close()
+                                        st.success("Sheet music uploaded and saved to database!")
+                                    
                                     # Try to rerun, otherwise notify and ask user to refresh manually
                                     try:
-                                        st.experimental_rerun()
+                                        st.rerun()
                                     except AttributeError:
-                                        st.warning("Sheet music uploaded! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
+                                        st.warning("Sheet music uploaded! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
                             elif uploaded_file is not None and not label_input.strip():
                                 st.warning("Please enter a label for this sheet music.")
                             elif uploaded_file is None:
@@ -1129,10 +1295,10 @@ def login_page():
     with col2:
         st.markdown("### New User?")
         st.markdown("Contact the administrator to create an account.")
-        st.markdown("Default admin credentials:")
-        st.markdown("- Username: admin")
-        st.markdown("- Password: admin123")
-        st.markdown("*Note: For demonstration purposes only.*")
+        # st.markdown("Default admin credentials:")
+        # st.markdown("- Username: admin")
+        # st.markdown("- Password: admin123")
+        # st.markdown("*Note: For demonstration purposes only.*")
 
 def logout():
     """Log out the current user."""
@@ -1143,7 +1309,7 @@ def logout():
     try:
         st.rerun()
     except AttributeError:
-        st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
+        st.warning("Note deleted! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
 
 def main():
     # Display login status and logout button in sidebar if logged in
