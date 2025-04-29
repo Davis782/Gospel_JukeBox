@@ -724,6 +724,7 @@ def display_music_library():
                             for lbl in unique_labels:
                                 st.write(f"- {lbl}")
                         else:
+                            filtered_notes = all_notes
                             st.info("No labels to display.")
                     else:
                         # Determine which notes to show
@@ -733,6 +734,7 @@ def display_music_library():
                             )
                             filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
                         else:
+                            filtered_notes = all_notes
 
                 # --- Add New Note Section (Logged-in Users Only) ---
 
@@ -745,6 +747,7 @@ def display_music_library():
                         if label_options:
                             selected_label_id = st.selectbox("Note Label (Type)", options=[lid for _, lid in label_options], format_func=lambda lid: label_id_to_name.get(lid, str(lid)), key="new_note_label_id")
                         else:
+                            filtered_notes = all_notes
                             selected_label_id = None
                         new_note_content = st.text_area("Note Content", height=100, key="new_note_content")
                         submit_new_note = st.form_submit_button("Save New Note")
@@ -755,6 +758,7 @@ def display_music_library():
                         if not selected_label_id or not new_note_content.strip():
                             st.warning("Both Label and Content are required to save a new note.")
                         else:
+                            filtered_notes = all_notes
                             supabase_client.table('notes')\
                                 .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
                                 .execute()
@@ -787,6 +791,7 @@ def display_music_library():
                             if new_label.strip() in unique_labels:
                                 st.warning(f"Label '{new_label.strip()}' already exists for this song.")
                             else:
+                            filtered_notes = all_notes
                                 # Get current username for creator attribution
                                 creator = st.session_state.get('username', '')
                                 
@@ -795,6 +800,7 @@ def display_music_library():
                                     .execute()
                                 st.success(f"Sheet music type '{new_label.strip()}' added!")
                         else:
+                            filtered_notes = all_notes
                             st.warning("Please enter a label name.")
                 
                 # Remove selected sheet music - moved outside the Add Type button logic
@@ -836,6 +842,7 @@ def display_music_library():
                                 if label_input.strip() in unique_labels:
                                     st.warning(f"Label '{label_input.strip()}' already exists for this song. Please use a unique label.")
                                 else:
+                            filtered_notes = all_notes
                                     ext = uploaded_file.name.split('.')[-1]
                                     save_path = os.path.join(
                                         os.path.join(PICTURES_DIR, "sheet_music"), 
@@ -941,6 +948,7 @@ def display_music_library():
                         if new_label.strip() in unique_labels:
                             st.warning(f"Label '{new_label.strip()}' already exists for this song. Please use a unique label.")
                         else:
+                            filtered_notes = all_notes
                             # Get current username for creator attribution
                             creator = st.session_state.get('username', '')
                             
