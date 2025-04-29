@@ -690,10 +690,10 @@ def display_music_library():
 
                 # --- Display All Existing Notes --- 
                 res = supabase_client.table('notes')\
-                    .select('owner_id, label, content, created_at')\
+                    .select('owner_id, label_id, content, created_at')\
                     .eq('song_title', current_song_name)\
                     .execute()
-                all_notes = [(r['owner_id'], r['label'], r['content'], r['created_at']) for r in res.data]
+                all_notes = [(r['owner_id'], r['label_id'], r['content'], r['created_at']) for r in res.data]
                 
                 if all_notes:
                     # Prepare filtered notes by label
