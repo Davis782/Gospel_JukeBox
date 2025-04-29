@@ -50,13 +50,25 @@ class DatabaseManager:
             )
             ''')
             
-            # Create sheet_music table
+            # Create labels table
+            self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS labels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                song_title TEXT NOT NULL,
+                name TEXT NOT NULL,
+                UNIQUE (song_title, name)
+            )
+            ''')
+            
+            # Create sheet_music table (now with label_id foreign key)
             self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS sheet_music (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                song_name TEXT NOT NULL UNIQUE,
+                song_name TEXT NOT NULL,
+                label_id TEXT,
                 file_path TEXT NOT NULL,
-                upload_date TIMESTAMP
+                upload_date TIMESTAMP,
+                FOREIGN KEY(label_id) REFERENCES labels(id)
             )
             ''')
             
@@ -122,33 +134,33 @@ class DatabaseManager:
         finally:
             self.disconnect()
     
-    def save_sheet_music_reference(self, song_name, file_path):
-        """Save or update sheet music file reference for a song."""
+    def save_sheet_music_reference(self, song_name, label_name, file_path):
+        """Save or update sheet music file reference for a song and label."""
         if not self.connect():
             return False
-        
         try:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
-            # Check if song exists in the database
-            self.cursor.execute("SELECT id FROM sheet_music WHERE song_name = ?", (song_name,))
+            # Lookup label_id for this song and label
+            self.cursor.execute("SELECT id FROM labels WHERE song_title = ? AND name = ?", (song_name, label_name))
+            label_row = self.cursor.fetchone()
+            label_id = label_row[0] if label_row else None
+            # Check if sheet music exists for this song and label
+            self.cursor.execute("SELECT id FROM sheet_music WHERE song_name = ? AND label_id = ?", (song_name, label_id))
             result = self.cursor.fetchone()
-            
             if result:
                 # Update existing reference
                 self.cursor.execute(
-                    "UPDATE sheet_music SET file_path = ?, upload_date = ? WHERE song_name = ?",
-                    (file_path, timestamp, song_name)
+                    "UPDATE sheet_music SET file_path = ?, upload_date = ? WHERE song_name = ? AND label_id = ?",
+                    (file_path, timestamp, song_name, label_id)
                 )
             else:
                 # Insert new reference
                 self.cursor.execute(
-                    "INSERT INTO sheet_music (song_name, file_path, upload_date) VALUES (?, ?, ?)",
-                    (song_name, file_path, timestamp)
+                    "INSERT INTO sheet_music (song_name, label_id, file_path, upload_date) VALUES (?, ?, ?, ?)",
+                    (song_name, label_id, file_path, timestamp)
                 )
-            
             self.conn.commit()
-            logger.info(f"Sheet music reference saved for song: {song_name}")
+            logger.info(f"Sheet music reference saved for song: {song_name}, label: {label_name}")
             return True
         except sqlite3.Error as e:
             logger.error(f"Error saving sheet music reference: {e}")
@@ -156,22 +168,23 @@ class DatabaseManager:
         finally:
             self.disconnect()
     
-    def get_sheet_music_path(self, song_name):
-        """Retrieve sheet music file path for a specific song."""
+    def get_sheet_music_paths(self, song_name):
+        """Retrieve all sheet music file paths and their labels for a specific song."""
         if not self.connect():
-            return None
-        
+            return []
         try:
-            self.cursor.execute("SELECT file_path FROM sheet_music WHERE song_name = ?", (song_name,))
-            result = self.cursor.fetchone()
-            
-            if result:
-                return result[0]
-            else:
-                return None
+            self.cursor.execute("""
+                SELECT sm.file_path, l.name as label_name
+                FROM sheet_music sm
+                LEFT JOIN labels l ON sm.label_id = l.id
+                WHERE sm.song_name = ?
+            """, (song_name,))
+            results = self.cursor.fetchall()
+            # Returns a list of (file_path, label_name)
+            return results
         except sqlite3.Error as e:
-            logger.error(f"Error retrieving sheet music path: {e}")
-            return None
+            logger.error(f"Error retrieving sheet music paths: {e}")
+            return []
         finally:
             self.disconnect()
     

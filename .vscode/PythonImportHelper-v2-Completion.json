@@ -621,6 +621,15 @@
         "documentation": {}
     },
     {
+        "label": "admin_dashboard",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "def admin_dashboard():\n    st.header(\"Admin Dashboard: User Management\")\n    st.write(\"(Feature coming soon: Add, remove, and manage users)\")\ndef logout():\n    \"\"\"Log out the current user.\"\"\"\n    st.session_state.logged_in = False\n    st.session_state.username = None\n    st.session_state.is_admin = False\n    st.success(\"You have been logged out.\")\n    try:",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
         "label": "logout",
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
@@ -1273,7 +1282,7 @@
         "kind": 2,
         "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
         "description": "Streamlit_Gospel_JukeBox_Supabase_db",
-        "peekOfCode": "def get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())\n    return [(r[\"name\"], r[\"owner_id\"]) for r in res.data] if res.data else []\ndef fetch_notes(song_title):\n    res = (supabase",
+        "peekOfCode": "def get_labels_for_song_instrument(song_title, instrument):\n    res = (supabase\n           .table(\"labels\")\n           .select(\"name, owner_id\")\n           .eq(\"song_title\", song_title)\n           .eq(\"instrument\", instrument)\n           .execute())\n    return [(r[\"name\"], r[\"owner_id\"]) for r in res.data] if res.data else []\ndef fetch_notes(song_title):\n    # Fetch notes with label_id, then join with labels to get label name",
         "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
         "documentation": {}
     },
@@ -1282,7 +1291,7 @@
         "kind": 2,
         "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
         "description": "Streamlit_Gospel_JukeBox_Supabase_db",
-        "peekOfCode": "def fetch_notes(song_title):\n    res = (supabase\n           .table(\"notes\")\n           .select(\"owner_id, content, label\")\n           .eq(\"song_title\", song_title)\n           .order(\"owner_id\", {\"ascending\": True})\n           .execute())\n    return res.data if res.data else []\ndef add_note(song_title, owner_id, label, content):\n    payload = {",
+        "peekOfCode": "def fetch_notes(song_title):\n    # Fetch notes with label_id, then join with labels to get label name\n    notes_res = (\n        supabase\n        .table(\"notes\")\n        .select(\"owner_id, content, label_id\")\n        .eq(\"song_title\", song_title)\n        .order(\"owner_id\", {\"ascending\": True})\n        .execute()\n    )",
         "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
         "documentation": {}
     },
@@ -1291,7 +1300,34 @@
         "kind": 2,
         "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
         "description": "Streamlit_Gospel_JukeBox_Supabase_db",
-        "peekOfCode": "def add_note(song_title, owner_id, label, content):\n    payload = {\n        \"song_title\": song_title,\n        \"owner_id\": owner_id,\n        \"label\": label,\n        \"content\": content,\n        \"created_at\": datetime.utcnow().isoformat()\n    }\n    supabase.table(\"notes\").insert(payload).execute()\n# --- Main page: Music Library ---",
+        "peekOfCode": "def add_note(song_title, owner_id, label, content):\n    # Look up label_id for the given label name and song_title\n    label_id = None\n    label_res = (\n        supabase\n        .table(\"labels\")\n        .select(\"id\")\n        .eq(\"song_title\", song_title)\n        .eq(\"name\", label)\n        .maybe_single()",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_sheet_music",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def fetch_sheet_music(song_title):\n    # Fetch all sheet music for a song, joining with labels\n    res = (\n        supabase\n        .table(\"sheet_music\")\n        .select(\"id, file_path, label_id, upload_date, label:label_id(name)\")\n        .eq(\"song_name\", song_title)\n        .order(\"upload_date\", {\"ascending\": False})\n        .execute()\n    )",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "fetch_labels_for_song",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def fetch_labels_for_song(song_title):\n    res = (\n        supabase\n        .table(\"labels\")\n        .select(\"id, name\")\n        .eq(\"song_title\", song_title)\n        .execute()\n    )\n    return res.data if res.data else []\ndef insert_sheet_music(song_title, label_id, file_obj, file_name, user_id):",
+        "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "documentation": {}
+    },
+    {
+        "label": "insert_sheet_music",
+        "kind": 2,
+        "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "description": "Streamlit_Gospel_JukeBox_Supabase_db",
+        "peekOfCode": "def insert_sheet_music(song_title, label_id, file_obj, file_name, user_id):\n    # Upload file to Supabase Storage (bucket: sheet_music_files)\n    bucket = \"sheet_music_files\"\n    storage_path = f\"{song_title}/{label_id}/{file_name}\"\n    supabase.storage.from_(bucket).upload(storage_path, file_obj, file_options={\"content-type\": \"application/pdf\"})\n    # Insert reference into sheet_music table\n    payload = {\n        \"song_name\": song_title,\n        \"label_id\": label_id,\n        \"file_path\": storage_path,",
         "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
         "documentation": {}
     },
@@ -1300,7 +1336,7 @@
         "kind": 2,
         "importPath": "Streamlit_Gospel_JukeBox_Supabase_db",
         "description": "Streamlit_Gospel_JukeBox_Supabase_db",
-        "peekOfCode": "def display_music_library():\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Search\n    search_query = st.text_input(\"Search songs by title, sheet music label, or note label\")\n    if search_query:\n        by_title = [s for s in mp3_files if search_query.lower() in s.lower()]\n        lab = (supabase.table(\"labels\").select(\"song_title\")\n               .like(\"name\", f\"%{search_query}%\").execute().data or [])\n        note = (supabase.table(\"notes\").select(\"song_title\")",
+        "peekOfCode": "def display_music_library():\n    st.header(\"Music Library\")\n    mp3_files = load_content()\n    # Search\n    search_query = st.text_input(\"Search songs by title, sheet music label, or note label\")\n    if search_query:\n        by_title = [s for s in mp3_files if search_query.lower() in s.lower()]\n        lab = (supabase.table(\"labels\").select(\"song_title\")\n               .like(\"name\", f\"%{search_query}%\").execute().data or [])\n        # Find label ids matching the search",
         "detail": "Streamlit_Gospel_JukeBox_Supabase_db",
         "documentation": {}
     },
