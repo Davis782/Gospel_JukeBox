@@ -519,12 +519,19 @@ def display_music_library():
             .execute()
         label_matches = [r['song_title'] for r in res.data if r['song_title'] in mp3_files]
         
-        # Also search by note labels in song_notes
-        res = supabase_client.table('notes')\
-            .select('song_title')\
-            .ilike('label', f'%{search_query}%')\
+        # Also search by note label_id (join with labels table)
+        label_id_res = supabase_client.table('labels')\
+            .select('id, song_title')\
+            .ilike('name', f'%{search_query}%')\
             .execute()
-        note_matches = [r['song_title'] for r in res.data if r['song_title'] in mp3_files]
+        matching_label_ids = [r['id'] for r in label_id_res.data]
+        note_matches = []
+        if matching_label_ids:
+            note_res = supabase_client.table('notes')\
+                .select('song_title, label_id')\
+                .in_('label_id', matching_label_ids)\
+                .execute()
+            note_matches = [r['song_title'] for r in note_res.data if r['song_title'] in mp3_files]
         
         # Combine results from both searches and remove duplicates
         filtered_songs = list(set(filtered_songs + label_matches + note_matches))
@@ -695,9 +702,19 @@ def display_music_library():
                     .execute()
                 all_notes = [(r['owner_id'], r['label_id'], r['content'], r['created_at']) for r in res.data]
                 
-                if all_notes:
-                    # Prepare filtered notes by label
-                    unique_labels = sorted({lbl for _, lbl, _, _ in all_notes if lbl})
+                # Fetch label names for all label_ids present in notes
+                label_ids_in_notes = sorted({lbl for _, lbl, _, _ in all_notes if lbl})
+                label_id_to_name = {}
+                if label_ids_in_notes:
+                    label_res = supabase_client.table('labels')\
+                        .select('id, name')\
+                        .in_('id', label_ids_in_notes)\
+                        .execute()
+                    label_id_to_name = {r['id']: r['name'] for r in label_res.data}
+                unique_labels = [label_id_to_name.get(lid, str(lid)) for lid in label_ids_in_notes]
+                # Map label_id to label name for display
+                def label_display(lid):
+                    return label_id_to_name.get(lid, '[No Label]')
                     note_view_mode = st.radio(
                         "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
                     )
@@ -722,7 +739,7 @@ def display_music_library():
                         notes_container = st.container()  # Use a container for better layout control
                         with notes_container:
                             for user, label, note_content, note_time in filtered_notes:
-                                display_label = label if label else '[No Label]'
+                                display_label = label_display(label)
                                 # Display each note in a read-only text area within the container
                                 st.text_area(
                                     f"Note by {user} ({display_label})", 
@@ -737,26 +754,28 @@ def display_music_library():
 
                 # --- Add New Note Section (Logged-in Users Only) ---
 
-                # --- Add New Note Section (Logged-in Users Only) ---
                 if is_logged_in:
                     st.markdown("---")
                     st.markdown("#### Add Your Note")
                     with st.form(key='add_note_form'):
-                        new_note_label = st.text_input("Note Label (e.g., 'Verse 1 Chords', 'Performance Idea')", key="new_note_label")
+                        # Use a dropdown for label selection based on available labels
+                        label_options = [(label_id_to_name[lid], lid) for lid in label_id_to_name] if label_id_to_name else []
+                        if label_options:
+                            selected_label_id = st.selectbox("Note Label (Type)", options=[lid for _, lid in label_options], format_func=lambda lid: label_id_to_name.get(lid, str(lid)), key="new_note_label_id")
+                        else:
+                            selected_label_id = None
+                            st.info("No labels available for this song. Add a label/type first.")
                         new_note_content = st.text_area("Note Content", height=100, key="new_note_content")
                         submit_new_note = st.form_submit_button("Save New Note")
 
                         if submit_new_note:
-                            if not new_note_label.strip() or not new_note_content.strip():
+                            if not selected_label_id or not new_note_content.strip():
                                 st.warning("Both Label and Content are required to save a new note.")
                             else:
                                 supabase_client.table('notes')\
-                                    .insert({'song_title': current_song_name, 'label': new_note_label, 'content': new_note_content, 'owner_id': current_username})\
+                                    .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
                                     .execute()
-                                st.success(f"New note with label '{new_note_label}' saved!")
-                                # Clear form fields after successful submission is tricky with st.form, 
-                                # usually requires rerun or session state management.
-                                # For simplicity, we just show success and let rerun handle refresh.
+                                st.success(f"New note saved!")
                                 try: st.rerun() # Refresh to show the new note in the dropdown
                                 except: pass 
                 elif not all_notes: # Only show if not logged in AND no notes exist
