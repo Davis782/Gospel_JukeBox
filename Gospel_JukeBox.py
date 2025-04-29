@@ -777,14 +777,10 @@ def display_music_library():
                                 .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
                                 .execute()
                             st.success(f"New note saved!")
-                            try: st.rerun() # Refresh to show the new note in the dropdown
-                            except: pass 
-                                supabase_client.table('notes')\
-                                    .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
-                                    .execute()
-                                st.success(f"New note saved!")
-                                try: st.rerun() # Refresh to show the new note in the dropdown
-                                except: pass 
+                            try:
+                                st.rerun() # Refresh to show the new note in the dropdown
+                            except:
+                                pass
                 elif not all_notes: # Only show if not logged in AND no notes exist
                      st.info("Log in to add notes for this song.")
 
