@@ -748,7 +748,6 @@ def display_music_library():
                         if label_options:
                             selected_label_id = st.selectbox("Note Label (Type)", options=[lid for _, lid in label_options], format_func=lambda lid: label_id_to_name.get(lid, str(lid)), key="new_note_label_id")
                         else:
-                            filtered_notes = all_notes
                             selected_label_id = None
                         new_note_content = st.text_area("Note Content", height=100, key="new_note_content")
                         submit_new_note = st.form_submit_button("Save New Note")
@@ -786,13 +785,10 @@ def display_music_library():
                                     .select('name')\
                                     .eq('song_title', current_song_name)\
                                     .execute()
-                                unique_labels = [r['name'] for r in res.data if r['name']]
-                            
                             # Prevent duplicate label for this song/instrument
                             if new_label.strip() in unique_labels:
                                 st.warning(f"Label '{new_label.strip()}' already exists for this song.")
                             else:
-                            filtered_notes = all_notes
                                 # Get current username for creator attribution
                                 creator = st.session_state.get('username', '')
                                 
@@ -801,7 +797,6 @@ def display_music_library():
                                     .execute()
                                 st.success(f"Sheet music type '{new_label.strip()}' added!")
                         else:
-                            filtered_notes = all_notes
                             st.warning("Please enter a label name.")
                 
                 # Remove selected sheet music - moved outside the Add Type button logic
@@ -839,16 +834,6 @@ def display_music_library():
                         upload_btn = st.button("Upload Sheet Music", key="upload_sheet_music_btn")
                         if upload_btn:
                             if uploaded_file is not None and label_input.strip():
-                                # Prevent duplicate label for this song/instrument
-                                if label_input.strip() in unique_labels:
-                                    st.warning(f"Label '{label_input.strip()}' already exists for this song. Please use a unique label.")
-                                else:
-                            filtered_notes = all_notes
-                                    ext = uploaded_file.name.split('.')[-1]
-                                    save_path = os.path.join(
-                                        os.path.join(PICTURES_DIR, "sheet_music"), 
-                                        f"{os.path.splitext(st.session_state.current_song)[0]}_{label_input.strip().replace(' ', '_')}.{ext}"
-                                    )
                                     with open(save_path, "wb") as f:
                                         f.write(uploaded_file.getbuffer())
                                     # Get current username for creator attribution
