@@ -1,10 +1,18 @@
 import os
 import base64
 import sqlite3
+from dotenv import load_dotenv
 import streamlit as st
 from datetime import datetime
 import matplotlib.pyplot as plt
 from streamlit import components
+from supabase import create_client, Client
+
+# Load environment variables and initialize Supabase client
+load_dotenv('.env')  # load local .env
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Set page configuration
 st.set_page_config(
@@ -22,90 +30,6 @@ os.makedirs(MP3_DIR, exist_ok=True)
 os.makedirs(PICTURES_DIR, exist_ok=True)
 os.makedirs(os.path.join(PICTURES_DIR, "sheet_music"), exist_ok=True)
 
-# Initialize SQLite database for votes, sheet music, and users
-def init_db():
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    
-    # Create votes table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS votes (
-            song_name TEXT,
-            vote INTEGER
-        )
-    ''')
-    
-    # Create instrument sheet music table
-    cursor.execute('''
-        -- Updated schema: added 'label' column for multi-type sheet music support (2025-04-21)
-        -- Updated schema: added 'creator_username' column for permission management (2025-04-22)
-        CREATE TABLE IF NOT EXISTS instrument_sheet_music (
-            song_name TEXT,
-            instrument TEXT,
-            label TEXT,
-            file_path TEXT,
-            creator_username TEXT,
-            PRIMARY KEY (song_name, instrument, label)
-        )
-    ''')
-    
-    # Create song notes table to store user/admin notes
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS song_notes (
-            song_name TEXT,
-            username TEXT,
-            label TEXT,
-            notes TEXT,
-            last_updated TEXT,
-            PRIMARY KEY (song_name, username, label)
-        )
-    ''')
-    
-    # Create users table for authentication
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            username TEXT PRIMARY KEY,
-            password TEXT,
-            is_admin INTEGER DEFAULT 0
-        )
-    ''')
-    
-    # --- MIGRATION: Add 'is_admin' column if missing for legacy DBs ---
-    cursor.execute("PRAGMA table_info(users)")
-    columns = [col[1] for col in cursor.fetchall()]
-    if 'is_admin' not in columns:
-        cursor.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
-    
-    # Add default admin user if not exists
-    cursor.execute("SELECT * FROM users WHERE username = 'admin'")
-    if not cursor.fetchone():
-        # Simple password storage for demo purposes
-        # In production, use password hashing
-        cursor.execute("PRAGMA table_info(users)")
-        cols = [col[1] for col in cursor.fetchall()]
-        if 'role' in cols:
-            cursor.execute("INSERT INTO users (username, password, is_admin, role) VALUES (?, ?, ?, ?)", ('admin', 'admin123', 1, 'admin'))
-        else:
-            cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)", ('admin', 'admin123', 1))
-    
-    # --- MIGRATION: Add 'label' and 'creator_username' columns if missing (for legacy DBs) ---
-    try:
-        cursor.execute("PRAGMA table_info(instrument_sheet_music)")
-        columns = [row[1] for row in cursor.fetchall()]
-        if 'label' not in columns:
-            cursor.execute("ALTER TABLE instrument_sheet_music ADD COLUMN label TEXT DEFAULT ''")
-            # Rebuild primary key if needed (requires manual intervention if not empty)
-            # For now, just add the column for compatibility.
-        if 'creator_username' not in columns:
-            cursor.execute("ALTER TABLE instrument_sheet_music ADD COLUMN creator_username TEXT DEFAULT ''")
-    except Exception as e:
-        print(f"Migration warning: {e}")
-    conn.commit()
-    conn.close()
-
-# Initialize the database
-init_db()
-
 # Define available instruments
 AVAILABLE_INSTRUMENTS = [
     "Lead_Guitar", 
@@ -119,60 +43,36 @@ AVAILABLE_INSTRUMENTS = [
 # --- Label Management Helper Functions ---
 def get_labels_for_song_instrument(song_name, instrument):
     """Return a list of (label, creator_username) for a given song/instrument."""
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?", (song_name, instrument))
-    labels = [(row[0], row[1] if row[1] else 'Unknown') for row in cursor.fetchall() if row[0]]
-    conn.close()
-    return labels
+    res = supabase_client.table('labels')\
+        .select('name, owner_id')\
+        .eq('song_title', song_name)\
+        .eq('instrument', instrument)\
+        .execute()
+    return [(r['name'], r['owner_id']) for r in res.data] if res.data else []
 
 def add_label(song_name, instrument, label, creator_username):
     """Add a new label for a song/instrument."""
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    cursor.execute(
-        "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
-        (song_name, instrument, label, '', creator_username)
-    )
-    conn.commit()
-    conn.close()
+    supabase_client.table('labels')\
+        .insert({'song_title': song_name, 'instrument': instrument, 'name': label, 'owner_id': creator_username})\
+        .execute()
 
 def delete_label(song_name, instrument, label):
     """Delete a label for a song/instrument."""
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?", (song_name, instrument, label))
-    conn.commit()
-    conn.close()
+    supabase_client.table('labels')\
+        .delete()\
+        .eq('song_title', song_name)\
+        .eq('instrument', instrument)\
+        .eq('name', label)\
+        .execute()
 
 def get_label_notes(song_name, instrument, label):
     """Return all notes for a song/instrument/label as a list of (username, notes, last_updated)."""
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT username, notes, last_updated FROM song_notes WHERE song_name = ? AND label = ?", (song_name, label))
-    notes = cursor.fetchall()
-    conn.close()
-    return notes
-# --- End Label Management Helpers ---
-
-# Initialize Supabase connection if environment variables are available
-SUPABASE_URL = os.environ.get('SUPABASE_URL')
-SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
-USE_SUPABASE = SUPABASE_URL and SUPABASE_KEY
-
-# If using Supabase, import the library
-if USE_SUPABASE:
-    try:
-        import supabase
-        from supabase import create_client, Client
-        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
-        print("Supabase client initialized successfully")
-    except ImportError:
-        print("Supabase library not installed. Run: pip install supabase")
-        USE_SUPABASE = False
-    except Exception as e:
-        print(f"Error initializing Supabase client: {e}")
-        USE_SUPABASE = False
+    res = supabase_client.table('notes')\
+        .select('owner_id, content, created_at')\
+        .eq('song_title', song_name)\
+        .eq('label', label)\
+        .execute()
+    return [(r['owner_id'], r['content'], r['created_at']) for r in res.data] if res.data else []
 
 # Initialize session state
 defaults = {
@@ -200,7 +100,7 @@ defaults = {
     'logged_in': False,  # User login status
     'username': None,  # Current logged in username
     'is_admin': False,  # Admin privileges flag
-    'use_supabase': USE_SUPABASE  # Flag to indicate if Supabase is being used
+    'use_supabase': True  # Flag to indicate if Supabase is being used
 }
 
 for key, value in defaults.items():
@@ -613,23 +513,18 @@ def display_music_library():
         filtered_songs = [song for song in mp3_files if search_query.lower() in song.lower()]
         
         # Always search by label in the database, regardless of whether we found matches by title
-        conn = sqlite3.connect('Gospel_Jukebox.db')
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT DISTINCT song_name FROM instrument_sheet_music WHERE label LIKE ?", 
-            (f'%{search_query}%',)
-        )
-        label_matches = [f"{row[0]}" for row in cursor.fetchall() if f"{row[0]}" in mp3_files]
-        conn.close()
+        res = supabase_client.table('labels')\
+            .select('song_title')\
+            .ilike('name', f'%{search_query}%')\
+            .execute()
+        label_matches = [r['song_title'] for r in res.data if r['song_title'] in mp3_files]
         
         # Also search by note labels in song_notes
-        conn = sqlite3.connect('Gospel_Jukebox.db')
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT DISTINCT song_name FROM song_notes WHERE label LIKE ?", (f'%{search_query}%',)
-        )
-        note_matches = [row[0] for row in cursor.fetchall() if row[0] in mp3_files]
-        conn.close()
+        res = supabase_client.table('notes')\
+            .select('song_title')\
+            .ilike('label', f'%{search_query}%')\
+            .execute()
+        note_matches = [r['song_title'] for r in res.data if r['song_title'] in mp3_files]
         
         # Combine results from both searches and remove duplicates
         filtered_songs = list(set(filtered_songs + label_matches + note_matches))
@@ -794,16 +689,15 @@ def display_music_library():
                 is_admin = st.session_state.get('is_admin', False)
 
                 # --- Display All Existing Notes --- 
-                conn = sqlite3.connect('Gospel_Jukebox.db')
-                cursor = conn.cursor()
-                # Fetch username, label, and notes content
-                cursor.execute("SELECT username, label, notes FROM song_notes WHERE song_name = ? ORDER BY username, label", (current_song_name,))
-                all_notes = cursor.fetchall()
-                conn.close()
-
+                res = supabase_client.table('notes')\
+                    .select('owner_id, label_id, content, created_at')\
+                    .eq('song_title', current_song_name)\
+                    .execute()
+                all_notes = [(r['owner_id'], r['label_id'], r['content'], r['created_at']) for r in res.data]
+                
                 if all_notes:
                     # Prepare filtered notes by label
-                    unique_labels = sorted({lbl for _, lbl, _ in all_notes if lbl})
+                    unique_labels = sorted({lbl for _, lbl, _, _ in all_notes if lbl})
                     note_view_mode = st.radio(
                         "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
                     )
@@ -827,7 +721,7 @@ def display_music_library():
                         st.markdown("**Existing Notes:**")
                         notes_container = st.container()  # Use a container for better layout control
                         with notes_container:
-                            for user, label, note_content in filtered_notes:
+                            for user, label, note_content, note_time in filtered_notes:
                                 display_label = label if label else '[No Label]'
                                 # Display each note in a read-only text area within the container
                                 st.text_area(
@@ -856,26 +750,15 @@ def display_music_library():
                             if not new_note_label.strip() or not new_note_content.strip():
                                 st.warning("Both Label and Content are required to save a new note.")
                             else:
-                                conn = sqlite3.connect('Gospel_Jukebox.db')
-                                cursor = conn.cursor()
-                                # Check if a note with the same user and label already exists for this song
-                                cursor.execute("SELECT 1 FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", 
-                                               (current_song_name, current_username, new_note_label))
-                                exists = cursor.fetchone()
-                                if exists:
-                                    st.error(f"You already have a note with the label '{new_note_label}' for this song. Please choose a different label or edit the existing one.")
-                                else:
-                                    cursor.execute("INSERT INTO song_notes (song_name, username, label, notes, last_updated) VALUES (?, ?, ?, ?, ?)",
-                                        (current_song_name, current_username, new_note_label, new_note_content, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-                                    )
-                                    conn.commit()
-                                    st.success(f"New note with label '{new_note_label}' saved!")
-                                    # Clear form fields after successful submission is tricky with st.form, 
-                                    # usually requires rerun or session state management.
-                                    # For simplicity, we just show success and let rerun handle refresh.
-                                    try: st.rerun() # Refresh to show the new note in the dropdown
-                                    except: pass 
-                                conn.close()
+                                supabase_client.table('notes')\
+                                    .insert({'song_title': current_song_name, 'label': new_note_label, 'content': new_note_content, 'owner_id': current_username})\
+                                    .execute()
+                                st.success(f"New note with label '{new_note_label}' saved!")
+                                # Clear form fields after successful submission is tricky with st.form, 
+                                # usually requires rerun or session state management.
+                                # For simplicity, we just show success and let rerun handle refresh.
+                                try: st.rerun() # Refresh to show the new note in the dropdown
+                                except: pass 
                 elif not all_notes: # Only show if not logged in AND no notes exist
                      st.info("Log in to add notes for this song.")
 
@@ -883,230 +766,48 @@ def display_music_library():
                 if is_admin:
                     st.markdown("---")
                     st.markdown("#### All Notes for this Song (Admin Management)")
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT username, label, notes, last_updated FROM song_notes WHERE song_name = ?", (current_song_name,))
-                    note_entries = cursor.fetchall()
-                    conn.close()
-                    if note_entries:
-                        for note_user, note_label, note_text, note_time in note_entries:
-                            # Use unique keys for delete buttons within the loop
-                            delete_key = f"delete_note_{note_user}_{note_label}_{current_song_name}"
-                            col_n1, col_n2, col_n3, col_n4 = st.columns([2, 2, 6, 2])
-                            with col_n1:
-                                st.write(f"User: {note_user}")
-                            with col_n2:
-                                st.write(f"Label: {note_label if note_label else '[No Label]'}")
-                            with col_n3:
-                                st.write(f"{note_text}")
-                            with col_n4:
-                                if st.button(f"Delete", key=delete_key):
-                                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                                    cursor = conn.cursor()
-                                    cursor.execute("DELETE FROM song_notes WHERE song_name = ? AND username = ? AND label = ?", (current_song_name, note_user, note_label))
-                                    conn.commit()
-                                    conn.close()
-                                    st.success(f"Note for user '{note_user}', label '{note_label}' deleted!")
-                                    try: 
-                                        st.rerun() # Refresh the page to reflect deletion
-                                    except AttributeError:
-                                        st.warning("Note deleted! Please manually refresh the page to see the update (st.rerun() is not available).")
-                                    except Exception as e:
-                                        st.error(f"Error deleting note: {e}")
-                    else:
-                        st.info("No notes found for admin management.")
-            else:
-                # Sheet Music Display with Instrument Selection
-                st.markdown("### Sheet Music")
-                
-                # Instrument and label selection dropdowns side by side
-                col1, col2 = st.columns(2)
-                with col1:
-                    selected_instrument = st.selectbox(
-                        "Select Instrument", 
-                        AVAILABLE_INSTRUMENTS,
-                        index=AVAILABLE_INSTRUMENTS.index(st.session_state.selected_instrument)
-                    )
-                with col2:
-                    # Fetch sheet music entries with creator information
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        "SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?",
-                        (st.session_state.current_song, st.session_state.selected_instrument)
-                    )
-                    sheet_music_entries = cursor.fetchall()
-                    conn.close()
-                    
-                    # Initialize unique_labels and label_to_creator
-                    unique_labels = []
-                    label_to_creator = {}
-                    
-                    for label, creator in sheet_music_entries:
-                        if label and label.strip() and label not in unique_labels:
-                            unique_labels.append(label)
-                            label_to_creator[label] = creator if creator else 'Unknown'
-                    
-                    # Use session state to remember selected label
-                    if st.session_state.selected_label is None or st.session_state.selected_label not in unique_labels:
-                        st.session_state.selected_label = unique_labels[0] if unique_labels else None
-                    
-                    # Display the label selector
-                    selected_label = st.selectbox(
-                        "Select Sheet Music Type", 
-                        unique_labels, 
-                        index=unique_labels.index(st.session_state.selected_label) if st.session_state.selected_label in unique_labels else 0,
-                        key="sheet_music_label_select"
-                    )
-                    st.session_state.selected_label = selected_label
-                    
-                    # Display label creator information
-                    if selected_label:
-                        st.write(f"Created by: {label_to_creator[selected_label]}")
-                    
-                # Update session state with selected instrument
-                if selected_instrument != st.session_state.selected_instrument:
-                    st.session_state.selected_instrument = selected_instrument
-                    st.session_state.selected_label = None  # Reset label when instrument changes
-                    try:
-                        st.rerun()  # Refresh to apply the instrument change
-                    except AttributeError:
-                        st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
-                
-                # Display sheet music if available
-                if selected_label:
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        "SELECT file_path FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
-                        (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
-                    )
-                    file_path = cursor.fetchone()[0] if cursor.fetchone() else None
-                    conn.close()
-                    
-                    if file_path and os.path.exists(file_path):
-                        st.image(file_path, caption=f"{st.session_state.selected_instrument} - {selected_label}", use_column_width=True)
-                    else:
-                        st.info(f"No sheet music file uploaded for '{selected_label}'.")
-                
-                # Admin controls for label management
-                if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
-                    st.markdown("---")
-                    st.subheader("Manage Sheet Music Labels")
-                    
                     # Add new sheet music type/label
                     new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
                     if st.button("Add Type", key="add_sheet_music_label_btn"):
                         if new_label.strip():
+                            # Make sure unique_labels is defined in this code path
+                            if 'unique_labels' not in locals():
+                                # Fetch labels if not already done
+                                res = supabase_client.table('labels')\
+                                    .select('name')\
+                                    .eq('song_title', current_song_name)\
+                                    .execute()
+                                unique_labels = [r['name'] for r in res.data if r['name']]
+                            
                             # Prevent duplicate label for this song/instrument
                             if new_label.strip() in unique_labels:
-                                st.warning(f"Label '{new_label.strip()}' already exists for this song/instrument. Please use a unique label.")
+                                st.warning(f"Label '{new_label.strip()}' already exists for this song.")
                             else:
-                                st.write("(No permission)")
-
-            # --- Notes Management Section (admins) ---
-            if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
-                st.markdown("---")
-                st.markdown("#### Notes for this Song (Admin Management)")
-                # Add new sheet music type/label
-                new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
-                if st.button("Add Type", key="add_sheet_music_label_btn"):
-                    if new_label.strip():
-                        # Make sure unique_labels is defined in this code path
-                        if 'unique_labels' not in locals():
-                            # Fetch labels if not already done
-                            conn = sqlite3.connect('Gospel_Jukebox.db')
-                            cursor = conn.cursor()
-                            cursor.execute(
-                                "SELECT label FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?",
-                                (st.session_state.current_song, st.session_state.selected_instrument)
-                            )
-                            unique_labels = [row[0] for row in cursor.fetchall() if row[0]]
-                            conn.close()
-                        
-                        # Prevent duplicate label for this song/instrument
-                        if new_label.strip() in unique_labels:
-                            st.warning(f"Label '{new_label.strip()}' already exists for this song/instrument.")
-                        else:
-                            # Get current username for creator attribution
-                            creator = st.session_state.get('username', '')
-                            
-                            if st.session_state.get('use_supabase', False):
-                                try:
-                                    # Insert into Supabase
-                                    data = {
-                                        'song_name': st.session_state.current_song,
-                                        'instrument': st.session_state.selected_instrument,
-                                        'label': new_label.strip(),
-                                        'file_path': "",
-                                        'creator_username': creator
-                                    }
-                                    supabase_client.table('instrument_sheet_music').insert(data).execute()
-                                    st.success(f"Sheet music type '{new_label.strip()}' added to Supabase!")
-                                except Exception as e:
-                                    st.error(f"Supabase error: {e}")
-                                    # Fall back to SQLite if Supabase fails
-                                    st.warning("Falling back to local database...")
-                                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                                    cursor = conn.cursor()
-                                    cursor.execute(
-                                        "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
-                                        (st.session_state.current_song, st.session_state.selected_instrument, new_label.strip(), "", creator)
-                                    )
-                                    conn.commit()
-                                    conn.close()
-                            else:
-                                # Use SQLite
-                                conn = sqlite3.connect('Gospel_Jukebox.db')
-                                cursor = conn.cursor()
-                                cursor.execute(
-                                    "INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
-                                    (st.session_state.current_song, st.session_state.selected_instrument, new_label.strip(), "", creator)
-                                )
-                                conn.commit()
-                                conn.close()
+                                # Get current username for creator attribution
+                                creator = st.session_state.get('username', '')
+                                
+                                supabase_client.table('labels')\
+                                    .insert({'song_title': current_song_name, 'name': new_label.strip(), 'owner_id': creator})\
+                                    .execute()
                                 st.success(f"Sheet music type '{new_label.strip()}' added!")
-                            
-                            # Try to rerun, otherwise notify and ask user to refresh manually
-                            try:
-                                st.rerun()
-                            except AttributeError:
-                                st.warning("Sheet music type added! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
-                    else:
-                        st.warning("Please enter a label name.")
+                        else:
+                            st.warning("Please enter a label name.")
                 
                 # Remove selected sheet music - moved outside the Add Type button logic
                 if 'selected_label' in locals() and st.button(f"🗑️ Remove '{selected_label}' Sheet Music", key="remove_sheet_music_btn"):
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute(
-                        "DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?",
-                        (st.session_state.current_song, st.session_state.selected_instrument, selected_label)
-                    )
-                    conn.commit()
-                    conn.close()
-                    # Delete file from disk
-                    if 'label_to_path' in locals() and selected_label in label_to_path:
-                        try:
-                            os.remove(label_to_path[selected_label])
-                            st.success(f"Sheet music '{selected_label}' removed!")
-                        except Exception as e:
-                            st.warning(f"File delete error: {e}")
+                    supabase_client.table('labels')\
+                        .delete()\
+                        .eq('song_title', current_song_name)\
+                        .eq('name', selected_label)\
+                        .execute()
+                    st.success(f"Sheet music '{selected_label}' removed!")
                     # Try to rerun, otherwise notify and ask user to refresh manually
                     try:
                         st.experimental_rerun()
                     except AttributeError:
                         st.warning("Sheet music removed! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
-                    else:
-                        st.info("Log in to manage sheet music.")
-                        if st.button("Go to Login", key="login_from_sheet_music"):
-                            st.session_state['login_checkbox'] = True
-                            try:
-                                st.rerun()
-                            except AttributeError:
-                                st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                 else:
-                    st.warning(f"No sheet music available for {st.session_state.selected_instrument} on this song.")
+                    st.warning(f"No sheet music available for this song.")
                     # Check if user is logged in before showing upload option
                     if not st.session_state.logged_in:
                         st.info("Please log in to upload sheet music.")
@@ -1120,63 +821,190 @@ def display_music_library():
                     else:
                         label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
                         uploaded_file = st.file_uploader(
-                            f"Upload {st.session_state.selected_instrument} Sheet Music (JPG, PNG, PDF)", 
+                            f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
-                            key=f"upload_{st.session_state.selected_instrument}"
+                            key=f"upload_sheet_music"
                         )
                         upload_btn = st.button("Upload Sheet Music", key="upload_sheet_music_btn")
                         if upload_btn:
                             if uploaded_file is not None and label_input.strip():
                                 # Prevent duplicate label for this song/instrument
                                 if label_input.strip() in unique_labels:
-                                    st.warning(f"Label '{label_input.strip()}' already exists for this song/instrument. Please use a unique label.")
+                                    st.warning(f"Label '{label_input.strip()}' already exists for this song. Please use a unique label.")
                                 else:
                                     ext = uploaded_file.name.split('.')[-1]
                                     save_path = os.path.join(
                                         os.path.join(PICTURES_DIR, "sheet_music"), 
-                                        f"{os.path.splitext(st.session_state.current_song)[0]}_{st.session_state.selected_instrument}_{label_input.strip().replace(' ', '_')}.{ext}"
+                                        f"{os.path.splitext(st.session_state.current_song)[0]}_{label_input.strip().replace(' ', '_')}.{ext}"
                                     )
                                     with open(save_path, "wb") as f:
                                         f.write(uploaded_file.getbuffer())
                                     # Get current username for creator attribution
                                     creator = st.session_state.get('username', '')
                                     
-                                    if st.session_state.get('use_supabase', False):
-                                        try:
-                                            # Store in Supabase
-                                            data = {
-                                                'song_name': st.session_state.current_song,
-                                                'instrument': st.session_state.selected_instrument,
-                                                'label': label_input.strip(),
-                                                'file_path': save_path,
-                                                'creator_username': creator
-                                            }
-                                            supabase_client.table('instrument_sheet_music').upsert(data).execute()
-                                            st.success("Sheet music uploaded and saved to Supabase!")
-                                        except Exception as e:
-                                            st.error(f"Supabase error: {e}")
-                                            # Fall back to SQLite
-                                            conn = sqlite3.connect('Gospel_Jukebox.db')
-                                            cursor = conn.cursor()
-                                            cursor.execute(
-                                                "INSERT OR REPLACE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
-                                                (st.session_state.current_song, st.session_state.selected_instrument, label_input.strip(), save_path, creator)
-                                            )
-                                            conn.commit()
-                                            conn.close()
-                                            st.success("Sheet music uploaded and saved to local database!")
-                                    else:
-                                        # Use SQLite
-                                        conn = sqlite3.connect('Gospel_Jukebox.db')
-                                        cursor = conn.cursor()
-                                        cursor.execute(
-                                            "INSERT OR REPLACE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)",
-                                            (st.session_state.current_song, st.session_state.selected_instrument, label_input.strip(), save_path, creator)
-                                        )
-                                        conn.commit()
-                                        conn.close()
-                                        st.success("Sheet music uploaded and saved to database!")
+                                    supabase_client.table('labels')\
+                                        .insert({'song_title': current_song_name, 'name': label_input.strip(), 'owner_id': creator})\
+                                        .execute()
+                                    st.success("Sheet music uploaded and saved!")
+                                    # Try to rerun, otherwise notify and ask user to refresh manually
+                                    try:
+                                        st.rerun()
+                                    except AttributeError:
+                                        st.warning("Sheet music uploaded! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
+                            elif uploaded_file is not None and not label_input.strip():
+                                st.warning("Please enter a label for this sheet music.")
+                            elif uploaded_file is None:
+                                st.warning("Please select a file to upload.")
+
+            # Sheet Music Display with Instrument Selection
+            st.markdown("### Sheet Music")
+            
+            # Instrument and label selection dropdowns side by side
+            col1, col2 = st.columns(2)
+            with col1:
+                selected_instrument = st.selectbox(
+                    "Select Instrument", 
+                    AVAILABLE_INSTRUMENTS,
+                    index=AVAILABLE_INSTRUMENTS.index(st.session_state.selected_instrument)
+                )
+            with col2:
+                # Fetch sheet music entries with creator information
+                res = supabase_client.table('labels')\
+                    .select('name, owner_id')\
+                    .eq('song_title', st.session_state.current_song)\
+                    .execute()
+                sheet_music_entries = [(r['name'], r['owner_id']) for r in res.data]
+                
+                # Initialize unique_labels and label_to_creator
+                unique_labels = []
+                label_to_creator = {}
+                
+                for label, creator in sheet_music_entries:
+                    if label and label.strip() and label not in unique_labels:
+                        unique_labels.append(label)
+                        label_to_creator[label] = creator if creator else 'Unknown'
+                
+                # Use session state to remember selected label
+                if st.session_state.selected_label is None or st.session_state.selected_label not in unique_labels:
+                    st.session_state.selected_label = unique_labels[0] if unique_labels else None
+                
+                # Display the label selector
+                selected_label = st.selectbox(
+                    "Select Sheet Music Type", 
+                    unique_labels, 
+                    index=unique_labels.index(st.session_state.selected_label) if st.session_state.selected_label in unique_labels else 0,
+                    key="sheet_music_label_select"
+                )
+                st.session_state.selected_label = selected_label
+                
+                # Display label creator information
+                if selected_label:
+                    st.write(f"Created by: {label_to_creator[selected_label]}")
+            
+            # Update session state with selected instrument
+            if selected_instrument != st.session_state.selected_instrument:
+                st.session_state.selected_instrument = selected_instrument
+                st.session_state.selected_label = None  # Reset label when instrument changes
+                try:
+                    st.rerun()  # Refresh to apply the instrument change
+                except AttributeError:
+                    st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
+            
+            # Display sheet music if available
+            if selected_label:
+                res = supabase_client.table('labels')\
+                    .select('file_path')\
+                    .eq('song_title', st.session_state.current_song)\
+                    .eq('name', selected_label)\
+                    .execute()
+                file_path = res.data[0]['file_path'] if res.data else None
+                
+                if file_path and os.path.exists(file_path):
+                    st.image(file_path, caption=f"{st.session_state.selected_instrument} - {selected_label}", use_column_width=True)
+                else:
+                    st.info(f"No sheet music file uploaded for '{selected_label}'.")
+            
+            # Admin controls for label management
+            if st.session_state.get('logged_in', False) and st.session_state.get('is_admin', False):
+                st.markdown("---")
+                st.subheader("Manage Sheet Music Labels")
+                
+                # Add new sheet music type/label
+                new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
+                if st.button("Add Type", key="add_sheet_music_label_btn"):
+                    if new_label.strip():
+                        # Prevent duplicate label for this song/instrument
+                        if new_label.strip() in unique_labels:
+                            st.warning(f"Label '{new_label.strip()}' already exists for this song. Please use a unique label.")
+                        else:
+                            # Get current username for creator attribution
+                            creator = st.session_state.get('username', '')
+                            
+                            supabase_client.table('labels')\
+                                .insert({'song_title': st.session_state.current_song, 'name': new_label.strip(), 'owner_id': creator})\
+                                .execute()
+                            st.success(f"Sheet music type '{new_label.strip()}' added!")
+                            # Try to rerun, otherwise notify and ask user to refresh manually
+                            try:
+                                st.rerun()
+                            except AttributeError:
+                                st.warning("Sheet music type added! Please manually refresh the page to see the update (st.rerun() is not available in this Streamlit version).")
+                    else:
+                        st.warning("Please enter a label name.")
+                
+                # Remove selected sheet music - moved outside the Add Type button logic
+                if 'selected_label' in locals() and st.button(f"🗑️ Remove '{selected_label}' Sheet Music", key="remove_sheet_music_btn"):
+                    supabase_client.table('labels')\
+                        .delete()\
+                        .eq('song_title', st.session_state.current_song)\
+                        .eq('name', selected_label)\
+                        .execute()
+                    st.success(f"Sheet music '{selected_label}' removed!")
+                    # Try to rerun, otherwise notify and ask user to refresh manually
+                    try:
+                        st.experimental_rerun()
+                    except AttributeError:
+                        st.warning("Sheet music removed! Please manually refresh the page to see the update (st.experimental_rerun() is not available in this Streamlit version).")
+                else:
+                    st.warning(f"No sheet music available for this song.")
+                    # Check if user is logged in before showing upload option
+                    if not st.session_state.logged_in:
+                        st.info("Please log in to upload sheet music.")
+                        if st.button("Go to Login"):
+                            # Set the sidebar checkbox to trigger login page
+                            st.session_state['login_checkbox'] = True
+                            try:
+                                st.rerun()
+                            except AttributeError:
+                                st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
+                    else:
+                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
+                        uploaded_file = st.file_uploader(
+                            f"Upload Sheet Music (JPG, PNG, PDF)", 
+                            type=["jpg", "png", "pdf"],
+                            key=f"upload_sheet_music"
+                        )
+                        upload_btn = st.button("Upload Sheet Music", key="upload_sheet_music_btn")
+                        if upload_btn:
+                            if uploaded_file is not None and label_input.strip():
+                                # Prevent duplicate label for this song/instrument
+                                if label_input.strip() in unique_labels:
+                                    st.warning(f"Label '{label_input.strip()}' already exists for this song. Please use a unique label.")
+                                else:
+                                    ext = uploaded_file.name.split('.')[-1]
+                                    save_path = os.path.join(
+                                        os.path.join(PICTURES_DIR, "sheet_music"), 
+                                        f"{os.path.splitext(st.session_state.current_song)[0]}_{label_input.strip().replace(' ', '_')}.{ext}"
+                                    )
+                                    with open(save_path, "wb") as f:
+                                        f.write(uploaded_file.getbuffer())
+                                    # Get current username for creator attribution
+                                    creator = st.session_state.get('username', '')
                                     
+                                    supabase_client.table('labels')\
+                                        .insert({'song_title': current_song_name, 'name': label_input.strip(), 'owner_id': creator})\
+                                        .execute()
+                                    st.success("Sheet music uploaded and saved!")
                                     # Try to rerun, otherwise notify and ask user to refresh manually
                                     try:
                                         st.rerun()
@@ -1206,11 +1034,9 @@ def display_voting_page():
         vote_amount = st.slider("Rate this song (1-100 pennies):", min_value=1, max_value=100)
         if st.button("Submit Vote"):
             # Store the vote in the database
-            conn = sqlite3.connect('Gospel_Jukebox.db')
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO votes (song_name, vote) VALUES (?, ?)", (song_to_vote, vote_amount))
-            conn.commit()
-            conn.close()
+            supabase_client.table('votes')\
+                .insert({'song_title': song_to_vote, 'vote': vote_amount})\
+                .execute()
 
             # Open Cash App link in a new tab
             cash_app_link = f"https://cash.app/$SolidBuildersInc?amount={vote_amount}"
@@ -1223,12 +1049,11 @@ def display_results_page():
     st.header("Vote Results")
 
     # Fetch votes from the database
-    conn = sqlite3.connect('Gospel_Jukebox.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT song_name, SUM(vote) FROM votes GROUP BY song_name")
-    results = cursor.fetchall()
-    conn.close()
-
+    res = supabase_client.table('votes')\
+        .select('song_title, vote')\
+        .execute()
+    results = [(r['song_title'], r['vote']) for r in res.data]
+    
     if results:
         song_names = [row[0] for row in results]
         votes = [row[1] for row in results]
@@ -1262,55 +1087,73 @@ def display_about():
 
 def login_page():
     """Display the login page and handle authentication."""
+    import bcrypt
     st.header("Login to Gospel JukeBox")
     st.markdown("Please log in to access sheet music management features.")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        
+
         if st.button("Login"):
             if username and password:
-                # Check credentials against database
-                conn = sqlite3.connect('Gospel_Jukebox.db')
-                cursor = conn.cursor()
-                cursor.execute("SELECT username, is_admin FROM users WHERE username = ? AND password = ?", 
-                              (username, password))
-                user = cursor.fetchone()
-                conn.close()
-                
-                if user:
+                # Fetch user info from DB
+                res = supabase_client.table('users')\
+                    .select('username, password_hash, role')\
+                    .eq('username', username)\
+                    .execute()
+                user = res.data[0] if res.data else None
+
+                if user and bcrypt.checkpw(password.encode(), user['password_hash'].encode()):
                     st.session_state.logged_in = True
-                    st.session_state.username = user[0]
-                    st.session_state.is_admin = bool(user[1])
+                    st.session_state.username = user['username']
+                    st.session_state.role = user['role']
+                    st.session_state.is_admin = (user['role'] == 'admin')
                     st.success(f"Welcome, {username}!")
                     try:
                         st.rerun()
                     except AttributeError:
                         st.error("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
-                        if st.button("Back to Main"):
-                            st.session_state['login_checkbox'] = False
-                            st.session_state['show_login'] = False
-                            st.query_params.update({'page': 'main'})
                 else:
                     st.error("Invalid username or password.")
             else:
                 st.warning("Please enter both username and password.")
+
         # Add Back to Main button
         if st.button("Back to Main"):
             st.session_state['login_checkbox'] = False
             st.session_state['show_login'] = False
             st.query_params.update({'page': 'main'})
-    
+
     with col2:
-        st.markdown("### New User?")
-        st.markdown("Contact the administrator to create an account.")
-        # st.markdown("Default admin credentials:")
-        # st.markdown("- Username: admin")
-        # st.markdown("- Password: admin123")
-        # st.markdown("*Note: For demonstration purposes only.*")
+        st.markdown("### New User Registration")
+        new_username = st.text_input("New Username", key="register_username")
+        new_password = st.text_input("New Password", type="password", key="register_password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="register_confirm_password")
+        if st.button("Register"):
+            if not new_username or not new_password or not confirm_password:
+                st.warning("Please fill in all fields.")
+            elif new_password != confirm_password:
+                st.warning("Passwords do not match.")
+            else:
+                # Check if username already exists
+                res = supabase_client.table('users').select('username').eq('username', new_username).execute()
+                if res.data:
+                    st.warning("Username already exists.")
+                else:
+                    # Check if this is the first user (make admin if so)
+                    all_users = supabase_client.table('users').select('id').execute()
+                    role = 'admin' if not all_users.data else 'user'
+                    password_hash = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+                    supabase_client.table('users').insert({
+                        'username': new_username,
+                        'password_hash': password_hash,
+                        'role': role
+                    }).execute()
+                    st.success(f"Account created! You can now log in.{' (You are the admin)' if role == 'admin' else ''}")
+
 
 def logout():
     """Log out the current user."""
@@ -1356,16 +1199,10 @@ def main():
             new_label = st.sidebar.text_input('User Label (optional)', key='admin_add_label_input_sidebar')
             if st.sidebar.button('Create User', key='admin_create_user_btn_sidebar'):
                 if new_user and new_pass:
-                    conn = sqlite3.connect('Gospel_Jukebox.db')
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT username FROM users WHERE username = ?", (new_user,))
-                    if cursor.fetchone():
-                        st.sidebar.error('Username already exists.')
-                    else:
-                        cursor.execute("INSERT INTO users (username, password, is_admin) VALUES (?, ?, 0)", (new_user, new_pass))
-                        conn.commit()
-                        st.sidebar.success('User created!')
-                    conn.close()
+                    supabase_client.table('users')\
+                        .insert({'username': new_user, 'password': new_pass, 'is_admin': False})\
+                        .execute()
+                    st.sidebar.success('User created!')
                 else:
                     st.sidebar.warning('Please enter both username and password.')
         # Reset login checkbox when navigating to other pages

@@ -1127,32 +1127,37 @@ def login_page():
             st.session_state['show_login'] = False
             st.query_params.update({'page': 'main'})
 
-    with col2:
-        st.markdown("### New User Registration")
-        new_username = st.text_input("New Username", key="register_username")
-        new_password = st.text_input("New Password", type="password", key="register_password")
-        confirm_password = st.text_input("Confirm Password", type="password", key="register_confirm_password")
-        if st.button("Register"):
-            if not new_username or not new_password or not confirm_password:
-                st.warning("Please fill in all fields.")
-            elif new_password != confirm_password:
-                st.warning("Passwords do not match.")
-            else:
-                # Check if username already exists
-                res = supabase_client.table('users').select('username').eq('username', new_username).execute()
-                if res.data:
-                    st.warning("Username already exists.")
+    # Only show registration if there are NO users in the database
+    all_users = supabase_client.table('users').select('id').execute()
+    if not all_users.data:
+        with col2:
+            st.markdown("### Admin Registration (First User)")
+            new_username = st.text_input("Admin Username", key="register_username")
+            new_password = st.text_input("Admin Password", type="password", key="register_password")
+            confirm_password = st.text_input("Confirm Password", type="password", key="register_confirm_password")
+            if st.button("Register Admin"):
+                if not new_username or not new_password or not confirm_password:
+                    st.warning("Please fill in all fields.")
+                elif new_password != confirm_password:
+                    st.warning("Passwords do not match.")
                 else:
-                    # Check if this is the first user (make admin if so)
-                    all_users = supabase_client.table('users').select('id').execute()
-                    role = 'admin' if not all_users.data else 'user'
                     password_hash = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
                     supabase_client.table('users').insert({
                         'username': new_username,
                         'password_hash': password_hash,
-                        'role': role
+                        'role': 'admin'
                     }).execute()
-                    st.success(f"Account created! You can now log in.{' (You are the admin)' if role == 'admin' else ''}")
+                    st.success("Admin account created! You can now log in.")
+    else:
+        with col2:
+            st.info("Registration is disabled. Please contact the admin for access.")
+
+# Placeholder for admin dashboard
+# This will allow admin to add/remove users and assign roles.
+def admin_dashboard():
+    st.header("Admin Dashboard: User Management")
+    st.write("(Feature coming soon: Add, remove, and manage users)")
+
 
 
 def logout():

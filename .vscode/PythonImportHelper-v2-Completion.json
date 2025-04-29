@@ -135,6 +135,30 @@
         "documentation": {}
     },
     {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
+        "label": "load_dotenv",
+        "importPath": "dotenv",
+        "description": "dotenv",
+        "isExtraImport": true,
+        "detail": "dotenv",
+        "documentation": {}
+    },
+    {
         "label": "streamlit",
         "kind": 6,
         "isExtraImport": true,
@@ -177,19 +201,19 @@
         "documentation": {}
     },
     {
-        "label": "load_dotenv",
-        "importPath": "dotenv",
-        "description": "dotenv",
+        "label": "create_client",
+        "importPath": "supabase",
+        "description": "supabase",
         "isExtraImport": true,
-        "detail": "dotenv",
+        "detail": "supabase",
         "documentation": {}
     },
     {
-        "label": "load_dotenv",
-        "importPath": "dotenv",
-        "description": "dotenv",
+        "label": "Client",
+        "importPath": "supabase",
+        "description": "supabase",
         "isExtraImport": true,
-        "detail": "dotenv",
+        "detail": "supabase",
         "documentation": {}
     },
     {
@@ -453,20 +477,11 @@
         "documentation": {}
     },
     {
-        "label": "init_db",
-        "kind": 2,
-        "importPath": "Gospel_JukeBox copy",
-        "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''\n        CREATE TABLE IF NOT EXISTS votes (\n            song_name TEXT,\n            vote INTEGER\n        )\n    ''')",
-        "detail": "Gospel_JukeBox copy",
-        "documentation": {}
-    },
-    {
         "label": "get_labels_for_song_instrument",
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def get_labels_for_song_instrument(song_name, instrument):\n    \"\"\"Return a list of (label, creator_username) for a given song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT label, creator_username FROM instrument_sheet_music WHERE song_name = ? AND instrument = ?\", (song_name, instrument))\n    labels = [(row[0], row[1] if row[1] else 'Unknown') for row in cursor.fetchall() if row[0]]\n    conn.close()\n    return labels\ndef add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"",
+        "peekOfCode": "def get_labels_for_song_instrument(song_name, instrument):\n    \"\"\"Return a list of (label, creator_username) for a given song/instrument.\"\"\"\n    res = supabase_client.table('labels')\\\n        .select('name, owner_id')\\\n        .eq('song_title', song_name)\\\n        .eq('instrument', instrument)\\\n        .execute()\n    return [(r['name'], r['owner_id']) for r in res.data] if res.data else []\ndef add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -475,7 +490,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\n        \"INSERT OR IGNORE INTO instrument_sheet_music (song_name, instrument, label, file_path, creator_username) VALUES (?, ?, ?, ?, ?)\",\n        (song_name, instrument, label, '', creator_username)\n    )\n    conn.commit()\n    conn.close()",
+        "peekOfCode": "def add_label(song_name, instrument, label, creator_username):\n    \"\"\"Add a new label for a song/instrument.\"\"\"\n    supabase_client.table('labels')\\\n        .insert({'song_title': song_name, 'instrument': instrument, 'name': label, 'owner_id': creator_username})\\\n        .execute()\ndef delete_label(song_name, instrument, label):\n    \"\"\"Delete a label for a song/instrument.\"\"\"\n    supabase_client.table('labels')\\\n        .delete()\\\n        .eq('song_title', song_name)\\",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -484,7 +499,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def delete_label(song_name, instrument, label):\n    \"\"\"Delete a label for a song/instrument.\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"DELETE FROM instrument_sheet_music WHERE song_name = ? AND instrument = ? AND label = ?\", (song_name, instrument, label))\n    conn.commit()\n    conn.close()\ndef get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')",
+        "peekOfCode": "def delete_label(song_name, instrument, label):\n    \"\"\"Delete a label for a song/instrument.\"\"\"\n    supabase_client.table('labels')\\\n        .delete()\\\n        .eq('song_title', song_name)\\\n        .eq('instrument', instrument)\\\n        .eq('name', label)\\\n        .execute()\ndef get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -493,7 +508,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT username, notes, last_updated FROM song_notes WHERE song_name = ? AND label = ?\", (song_name, label))\n    notes = cursor.fetchall()\n    conn.close()\n    return notes\n# --- End Label Management Helpers ---\n# Initialize Supabase connection if environment variables are available",
+        "peekOfCode": "def get_label_notes(song_name, instrument, label):\n    \"\"\"Return all notes for a song/instrument/label as a list of (username, notes, last_updated).\"\"\"\n    res = supabase_client.table('notes')\\\n        .select('owner_id, content, created_at')\\\n        .eq('song_title', song_name)\\\n        .eq('label', label)\\\n        .execute()\n    return [(r['owner_id'], r['content'], r['created_at']) for r in res.data] if res.data else []\n# Initialize session state\ndefaults = {",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -583,7 +598,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def display_results_page():\n    \"\"\"Display the voting results as a pie chart.\"\"\"\n    st.header(\"Vote Results\")\n    # Fetch votes from the database\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    cursor.execute(\"SELECT song_name, SUM(vote) FROM votes GROUP BY song_name\")\n    results = cursor.fetchall()\n    conn.close()\n    if results:",
+        "peekOfCode": "def display_results_page():\n    \"\"\"Display the voting results as a pie chart.\"\"\"\n    st.header(\"Vote Results\")\n    # Fetch votes from the database\n    res = supabase_client.table('votes')\\\n        .select('song_title, vote')\\\n        .execute()\n    results = [(r['song_title'], r['vote']) for r in res.data]\n    if results:\n        song_names = [row[0] for row in results]",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -601,7 +616,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):\n            if username and password:",
+        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    import bcrypt\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -624,11 +639,29 @@
         "documentation": {}
     },
     {
+        "label": "SUPABASE_URL",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "SUPABASE_URL = os.getenv(\"SUPABASE_URL\")\nSUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Set page configuration\nst.set_page_config(\n    page_title=\"Gospel JukeBox\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
+        "label": "SUPABASE_KEY",
+        "kind": 5,
+        "importPath": "Gospel_JukeBox copy",
+        "description": "Gospel_JukeBox copy",
+        "peekOfCode": "SUPABASE_KEY = os.getenv(\"SUPABASE_KEY\")\nsupabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)\n# Set page configuration\nst.set_page_config(\n    page_title=\"Gospel JukeBox\",\n    page_icon=\"🎵\",\n    layout=\"wide\",\n    initial_sidebar_state=\"expanded\"\n)\n# Define application paths",
+        "detail": "Gospel_JukeBox copy",
+        "documentation": {}
+    },
+    {
         "label": "BASE_DIR",
         "kind": 5,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()",
+        "peekOfCode": "BASE_DIR = os.path.dirname(os.path.abspath(__file__))\nMP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Define available instruments\nAVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", ",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -637,7 +670,7 @@
         "kind": 5,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table",
+        "peekOfCode": "MP3_DIR = os.path.join(BASE_DIR, \"mp3_files\")\nPICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Define available instruments\nAVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", \n    \"Piano\", ",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -646,7 +679,7 @@
         "kind": 5,
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
-        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Initialize SQLite database for votes, sheet music, and users\ndef init_db():\n    conn = sqlite3.connect('Gospel_Jukebox.db')\n    cursor = conn.cursor()\n    # Create votes table\n    cursor.execute('''",
+        "peekOfCode": "PICTURES_DIR = os.path.join(BASE_DIR, \"pictures\")\nos.makedirs(MP3_DIR, exist_ok=True)\nos.makedirs(PICTURES_DIR, exist_ok=True)\nos.makedirs(os.path.join(PICTURES_DIR, \"sheet_music\"), exist_ok=True)\n# Define available instruments\nAVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", \n    \"Piano\", \n    \"Drums\", ",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -656,33 +689,6 @@
         "importPath": "Gospel_JukeBox copy",
         "description": "Gospel_JukeBox copy",
         "peekOfCode": "AVAILABLE_INSTRUMENTS = [\n    \"Lead_Guitar\", \n    \"Bass\", \n    \"Piano\", \n    \"Drums\", \n    \"Trumpet\", \n    \"Saxophone\"\n]\n# --- Label Management Helper Functions ---\ndef get_labels_for_song_instrument(song_name, instrument):",
-        "detail": "Gospel_JukeBox copy",
-        "documentation": {}
-    },
-    {
-        "label": "SUPABASE_URL",
-        "kind": 5,
-        "importPath": "Gospel_JukeBox copy",
-        "description": "Gospel_JukeBox copy",
-        "peekOfCode": "SUPABASE_URL = os.environ.get('SUPABASE_URL')\nSUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")",
-        "detail": "Gospel_JukeBox copy",
-        "documentation": {}
-    },
-    {
-        "label": "SUPABASE_KEY",
-        "kind": 5,
-        "importPath": "Gospel_JukeBox copy",
-        "description": "Gospel_JukeBox copy",
-        "peekOfCode": "SUPABASE_KEY = os.environ.get('SUPABASE_KEY')\nUSE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:",
-        "detail": "Gospel_JukeBox copy",
-        "documentation": {}
-    },
-    {
-        "label": "USE_SUPABASE",
-        "kind": 5,
-        "importPath": "Gospel_JukeBox copy",
-        "description": "Gospel_JukeBox copy",
-        "peekOfCode": "USE_SUPABASE = SUPABASE_URL and SUPABASE_KEY\n# If using Supabase, import the library\nif USE_SUPABASE:\n    try:\n        import supabase\n        from supabase import create_client, Client\n        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)\n        print(\"Supabase client initialized successfully\")\n    except ImportError:\n        print(\"Supabase library not installed. Run: pip install supabase\")",
         "detail": "Gospel_JukeBox copy",
         "documentation": {}
     },
@@ -836,6 +842,15 @@
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
         "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    import bcrypt\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):",
+        "detail": "Gospel_JukeBox",
+        "documentation": {}
+    },
+    {
+        "label": "admin_dashboard",
+        "kind": 2,
+        "importPath": "Gospel_JukeBox",
+        "description": "Gospel_JukeBox",
+        "peekOfCode": "def admin_dashboard():\n    st.header(\"Admin Dashboard: User Management\")\n    st.write(\"(Feature coming soon: Add, remove, and manage users)\")\ndef logout():\n    \"\"\"Log out the current user.\"\"\"\n    st.session_state.logged_in = False\n    st.session_state.username = None\n    st.session_state.is_admin = False\n    st.success(\"You have been logged out.\")\n    try:",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },
