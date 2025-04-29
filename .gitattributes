@@ -1,2 +1,8 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Local environment variables
+.env
+
+# Optional: ignore any other dotenv variants
+.env.*
