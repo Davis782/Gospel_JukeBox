@@ -733,24 +733,6 @@ def display_music_library():
                             )
                             filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
                         else:
-                            filtered_notes = all_notes
-
-                        st.markdown("**Existing Notes:**")
-                        notes_container = st.container()  # Use a container for better layout control
-                        with notes_container:
-                            for user, label, note_content, note_time in filtered_notes:
-                                display_label = label_display(label)
-                                # Display each note in a read-only text area within the container
-                                st.text_area(
-                                    f"Note by {user} ({display_label})", 
-                                    value=note_content if note_content else "", 
-                                    height=100, 
-                                    key=f"note_display_{user}_{label}", 
-                                    disabled=True # Make it read-only for now
-                                )
-                                st.markdown("--- *end of note* ---") # Separator
-                else:
-                    st.info("No notes found for this song yet.")
 
                 # --- Add New Note Section (Logged-in Users Only) ---
 
