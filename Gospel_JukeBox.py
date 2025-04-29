@@ -715,26 +715,27 @@ def display_music_library():
                 # Map label_id to label name for display
                 def label_display(lid):
                     return label_id_to_name.get(lid, '[No Label]')
-                    note_view_mode = st.radio(
-                        "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
-                    )
-                    if note_view_mode == "Labels only":
-                        st.markdown("**Note Labels:**")
-                        if unique_labels:
-                            for lbl in unique_labels:
-                                st.write(f"- {lbl}")
-                        else:
-                            filtered_notes = all_notes
-                            st.info("No labels to display.")
+
+                note_view_mode = st.radio(
+                    "Existing Notes View", ["All notes", "Labels only", "Filter by label"], index=0, key="note_view_mode_radio"
+                )
+                if note_view_mode == "Labels only":
+                    st.markdown("**Note Labels:**")
+                    if unique_labels:
+                        for lbl in unique_labels:
+                            st.write(f"- {lbl}")
                     else:
-                        # Determine which notes to show
-                        if note_view_mode == "Filter by label" and unique_labels:
-                            selected_note_label = st.selectbox(
-                                "Select label to filter notes", unique_labels, key="note_label_filter_select"
-                            )
-                            filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
-                        else:
-                            filtered_notes = all_notes
+                        filtered_notes = all_notes
+                        st.info("No labels to display.")
+                else:
+                    # Determine which notes to show
+                    if note_view_mode == "Filter by label" and unique_labels:
+                        selected_note_label = st.selectbox(
+                            "Select label to filter notes", unique_labels, key="note_label_filter_select"
+                        )
+                        filtered_notes = [item for item in all_notes if item[1] == selected_note_label]
+                    else:
+                        filtered_notes = all_notes
 
                 # --- Add New Note Section (Logged-in Users Only) ---
 
