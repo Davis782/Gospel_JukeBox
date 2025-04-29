@@ -835,7 +835,7 @@
         "kind": 2,
         "importPath": "Gospel_JukeBox",
         "description": "Gospel_JukeBox",
-        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):\n            if username and password:",
+        "peekOfCode": "def login_page():\n    \"\"\"Display the login page and handle authentication.\"\"\"\n    import bcrypt\n    st.header(\"Login to Gospel JukeBox\")\n    st.markdown(\"Please log in to access sheet music management features.\")\n    col1, col2 = st.columns(2)\n    with col1:\n        username = st.text_input(\"Username\")\n        password = st.text_input(\"Password\", type=\"password\")\n        if st.button(\"Login\"):",
         "detail": "Gospel_JukeBox",
         "documentation": {}
     },

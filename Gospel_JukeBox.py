@@ -1087,55 +1087,73 @@ def display_about():
 
 def login_page():
     """Display the login page and handle authentication."""
+    import bcrypt
     st.header("Login to Gospel JukeBox")
     st.markdown("Please log in to access sheet music management features.")
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        
+
         if st.button("Login"):
             if username and password:
-                # Check credentials against database
+                # Fetch user info from DB
                 res = supabase_client.table('users')\
-                    .select('username, is_admin')\
+                    .select('username, password_hash, role')\
                     .eq('username', username)\
-                    .eq('password', password)\
                     .execute()
                 user = res.data[0] if res.data else None
-                
-                if user:
+
+                if user and bcrypt.checkpw(password.encode(), user['password_hash'].encode()):
                     st.session_state.logged_in = True
                     st.session_state.username = user['username']
-                    st.session_state.is_admin = bool(user['is_admin'])
+                    st.session_state.role = user['role']
+                    st.session_state.is_admin = (user['role'] == 'admin')
                     st.success(f"Welcome, {username}!")
                     try:
                         st.rerun()
                     except AttributeError:
                         st.error("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
-                        if st.button("Back to Main"):
-                            st.session_state['login_checkbox'] = False
-                            st.session_state['show_login'] = False
-                            st.query_params.update({'page': 'main'})
                 else:
                     st.error("Invalid username or password.")
             else:
                 st.warning("Please enter both username and password.")
+
         # Add Back to Main button
         if st.button("Back to Main"):
             st.session_state['login_checkbox'] = False
             st.session_state['show_login'] = False
             st.query_params.update({'page': 'main'})
-    
+
     with col2:
-        st.markdown("### New User?")
-        st.markdown("Contact the administrator to create an account.")
-        # st.markdown("Default admin credentials:")
-        # st.markdown("- Username: admin")
-        # st.markdown("- Password: admin123")
-        # st.markdown("*Note: For demonstration purposes only.*")
+        st.markdown("### New User Registration")
+        new_username = st.text_input("New Username", key="register_username")
+        new_password = st.text_input("New Password", type="password", key="register_password")
+        confirm_password = st.text_input("Confirm Password", type="password", key="register_confirm_password")
+        if st.button("Register"):
+            if not new_username or not new_password or not confirm_password:
+                st.warning("Please fill in all fields.")
+            elif new_password != confirm_password:
+                st.warning("Passwords do not match.")
+            else:
+                # Check if username already exists
+                res = supabase_client.table('users').select('username').eq('username', new_username).execute()
+                if res.data:
+                    st.warning("Username already exists.")
+                else:
+                    # Check if this is the first user (make admin if so)
+                    all_users = supabase_client.table('users').select('id').execute()
+                    role = 'admin' if not all_users.data else 'user'
+                    password_hash = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
+                    supabase_client.table('users').insert({
+                        'username': new_username,
+                        'password_hash': password_hash,
+                        'role': role
+                    }).execute()
+                    st.success(f"Account created! You can now log in.{' (You are the admin)' if role == 'admin' else ''}")
+
 
 def logout():
     """Log out the current user."""
