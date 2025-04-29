@@ -764,14 +764,21 @@ def display_music_library():
                             selected_label_id = st.selectbox("Note Label (Type)", options=[lid for _, lid in label_options], format_func=lambda lid: label_id_to_name.get(lid, str(lid)), key="new_note_label_id")
                         else:
                             selected_label_id = None
-                            st.info("No labels available for this song. Add a label/type first.")
                         new_note_content = st.text_area("Note Content", height=100, key="new_note_content")
                         submit_new_note = st.form_submit_button("Save New Note")
+                    if is_logged_in and not label_options:
+                        st.info("No labels available for this song. Add a label/type first.")
 
-                        if submit_new_note:
-                            if not selected_label_id or not new_note_content.strip():
-                                st.warning("Both Label and Content are required to save a new note.")
-                            else:
+                    if submit_new_note:
+                        if not selected_label_id or not new_note_content.strip():
+                            st.warning("Both Label and Content are required to save a new note.")
+                        else:
+                            supabase_client.table('notes')\
+                                .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
+                                .execute()
+                            st.success(f"New note saved!")
+                            try: st.rerun() # Refresh to show the new note in the dropdown
+                            except: pass 
                                 supabase_client.table('notes')\
                                     .insert({'song_title': current_song_name, 'label_id': selected_label_id, 'content': new_note_content, 'owner_id': current_username})\
                                     .execute()
