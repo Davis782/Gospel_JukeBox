@@ -825,7 +825,7 @@ def display_music_library():
                             except AttributeError:
                                 st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                     else:
-                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
+                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input_1")
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
@@ -976,7 +976,7 @@ def display_music_library():
                             except AttributeError:
                                 st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                     else:
-                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
+                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input_2")
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
