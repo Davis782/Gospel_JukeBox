@@ -829,7 +829,7 @@ def display_music_library():
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
-                            key=f"upload_sheet_music"
+                            key=f"upload_sheet_music_1"
                         )
                         upload_btn = st.button("Upload Sheet Music", key="upload_sheet_music_btn")
                         if upload_btn:
@@ -980,7 +980,7 @@ def display_music_library():
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
-                            key=f"upload_sheet_music"
+                            key=f"upload_sheet_music_2"
                         )
                         upload_btn = st.button("Upload Sheet Music", key="upload_sheet_music_btn")
                         if upload_btn:
