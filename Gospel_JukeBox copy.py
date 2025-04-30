@@ -825,7 +825,7 @@ def display_music_library():
                             except AttributeError:
                                 st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                     else:
-                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
+                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input_1")
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
@@ -927,8 +927,8 @@ def display_music_library():
                 st.subheader("Manage Sheet Music Labels")
                 
                 # Add new sheet music type/label
-                new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label")
-                if st.button("Add Type", key="add_sheet_music_label_btn"):
+                new_label = st.text_input("Add New Sheet Music Type (Label)", key="add_sheet_music_label_sheetmusic")
+                if st.button("Add Type", key="add_sheet_music_label_btn_sheetmusic"):
                     if new_label.strip():
                         # Prevent duplicate label for this song/instrument
                         if new_label.strip() in unique_labels:
@@ -976,7 +976,7 @@ def display_music_library():
                             except AttributeError:
                                 st.warning("st.rerun() is not available in this Streamlit version. Please upgrade Streamlit.")
                     else:
-                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input")
+                        label_input = st.text_input("Label for this sheet music (e.g., Chord Progression, Arpeggios)", key="sheet_music_label_input_2")
                         uploaded_file = st.file_uploader(
                             f"Upload Sheet Music (JPG, PNG, PDF)", 
                             type=["jpg", "png", "pdf"],
